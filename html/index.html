@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gym Timer</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="manifest" href="manifest.json">
+</head>
+<body>
+  <header>
+    <h1>🏋️ Timer de Entrenamiento</h1>
+  </header>
+
+  <main>
+    <form id="config-form">
+      <label>Tiempo de ejercicio (seg): <input type="number" id="workTime" value="30"></label>
+      <label>Tiempo de descanso (seg): <input type="number" id="restTime" value="15"></label>
+      <label>Rondas: <input type="number" id="rounds" value="5"></label>
+      <button type="submit">Iniciar</button>
+
+    <label for="mode">Modo de entrenamiento:</label>
+    <select id="mode">
+    <option value="hiit" selected>HIIT (Personalizado)</option>
+    <option value="tabata">Tabata (20s / 10s × 8)</option>
+    <option value="amrap">AMRAP (X minutos)</option>
+    <option value="emom">EMOM (1 ejercicio/minuto)</option>
+</select>
+
+    </form>
+
+    <div id="timer-display">
+      <h2 id="phase">Listo</h2>
+      <div id="time">00:00</div>
+      <div id="round">Ronda 0</div>
+    </div>
+  </main>
+
+  <!-- Sonidos -->
+  <audio id="start-sound" src="sounds/start.mp3"></audio>
+  <audio id="rest-sound" src="sounds/rest.mp3"></audio>
+  <audio id="end-sound" src="sounds/end.mp3"></audio>
+  <audio id="beep-sound" src="sounds/beep.mp3"></audio>
+
+  <script src="../js/script.js"></script>
+</body>
+</html>
