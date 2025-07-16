@@ -54,54 +54,35 @@
 
   <script src="js/script.js"></script>
 
-  <!-- Agrega esto al final de tu <body> -->
-<script>
-  // Sistema de actualización via URL
-  function checkUrlParams() {
-    const params = new URLSearchParams(window.location.search);
-    
-    if(params.has('start')) {
-      workTime = parseInt(params.get('work')) || 30;
-      restTime = parseInt(params.get('rest')) || 15;
-      totalRounds = parseInt(params.get('rounds')) || 5;
-      startWorkout();
-    }
-    
-    if(params.has('pause')) togglePause();
-    if(params.has('reset')) resetTimer();
-  }
-
-  // Verificar cambios cada 2 segundos
-  setInterval(checkUrlParams, 2000);
-</script>
-
-<!-- Contenedor QR (visible solo al inicio) -->
-<div id="qr-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000;">
-  <h2 style="color: white; margin-bottom: 20px;">Escanear con el celular:</h2>
-  <canvas id="qr-code" width="200" height="200"></canvas>
-  <button id="close-qr" style="margin-top: 30px; padding: 10px 20px; background: #ff3366; color: white; border: none; border-radius: 5px; cursor: pointer;">Cerrar</button>
+  <!-- Modal de Emparejamiento -->
+<div id="pairing-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; color: white;">
+  <h2>🔗 Emparejar con el celular:</h2>
+  <div id="pairing-code" style="font-size: 3rem; letter-spacing: 10px; margin: 20px; color: #0ff;"></div>
+  <p>Ingresa este código en la app de control</p>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
 <script>
-  // Generar QR con URL de control
-  const qr = new QRious({
-    element: document.getElementById('qr-code'),
-    value: window.location.href.replace('index.html', 'control.html'),
-    size: 300
-  });
+  // Generar código de 4 dígitos
+  const pairingCode = Math.floor(1000 + Math.random() * 9000).toString();
+  document.getElementById('pairing-code').textContent = pairingCode;
+  localStorage.setItem('pairingCode', pairingCode);
 
-  // Cerrar el modal
-  document.getElementById('close-qr').addEventListener('click', () => {
-    document.getElementById('qr-modal').style.display = 'none';
-  });
-
-  // Mostrar QR al inicio (ocultar cuando el timer empiece)
-  setTimeout(() => {
-    if (!window.location.search.includes('start')) {
-      document.getElementById('qr-modal').style.display = 'flex';
+  // Verificar comandos cada segundo
+  setInterval(() => {
+    const savedCommand = localStorage.getItem('remoteCommand');
+    if (savedCommand) {
+      const { action, work, rest } = JSON.parse(savedCommand);
+      
+      // Verificar código de emparejamiento
+      if (localStorage.getItem('pairingCode') === pairingCode && action === 'start') {
+        document.getElementById('pairing-modal').style.display = 'none';
+        startWorkout(work, rest); // Tu función existente
+        localStorage.removeItem('remoteCommand');
+      }
     }
   }, 1000);
 </script>
+
+
 </body>
 </html>

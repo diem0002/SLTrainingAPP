@@ -2,72 +2,77 @@
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Control Remoto Gym Timer</title>
+  <title>Control Remoto</title>
   <style>
     body { 
       font-family: Arial; 
       padding: 20px;
-      background: #f5f5f5;
-    }
-    .control-panel {
-      display: grid;
-      gap: 15px;
-      max-width: 400px;
+      background: #f0f0f0;
+      max-width: 500px;
       margin: 0 auto;
     }
+    input, button {
+      padding: 12px;
+      margin: 8px 0;
+      width: 100%;
+      font-size: 1.1rem;
+    }
     button {
-      padding: 15px;
-      font-size: 1.2rem;
+      background: #4CAF50;
+      color: white;
       border: none;
-      border-radius: 8px;
       cursor: pointer;
     }
-    #start-btn { background: #4CAF50; color: white; }
-    #pause-btn { background: #FFC107; }
-    #reset-btn { background: #F44336; color: white; }
-    input { padding: 10px; font-size: 1rem; }
+    #status {
+      font-weight: bold;
+      margin: 15px 0;
+    }
   </style>
 </head>
 <body>
-  <div class="control-panel">
-    <h2>🏋️ Control Remoto</h2>
-    
-    <label>Ejercicio (seg): <input type="number" id="workTime" value="30"></label>
-    <label>Descanso (seg): <input type="number" id="restTime" value="15"></label>
-    <label>Rondas: <input type="number" id="rounds" value="5"></label>
-    
-    <button id="start-btn">▶ Iniciar</button>
-    <button id="pause-btn">⏸ Pausar</button>
-    <button id="reset-btn">↻ Reiniciar</button>
-    
-    <div id="qr-container" style="margin-top: 20px;"></div>
-  </div>
+  <h2>📱 Control Remoto</h2>
+  
+  <input type="number" id="pairing-code" placeholder="Código del TV">
+  <button id="connect-btn">Conectar</button>
+  
+  <div id="status">Desconectado</div>
+  
+  <label>Tiempo Ejercicio (s):</label>
+  <input type="number" id="work-time" value="30">
+  
+  <label>Tiempo Descanso (s):</label>
+  <input type="number" id="rest-time" value="15">
+  
+  <button id="start-btn" disabled>▶ Iniciar</button>
 
   <script>
-    // Generar URL de control
-    function generateUrl(action) {
-      const baseUrl = 'https://diem0002.github.io/SLTrainingAPP';
-      const workTime = document.getElementById('workTime').value;
-      const restTime = document.getElementById('restTime').value;
-      const rounds = document.getElementById('rounds').value;
-      
-      return `${baseUrl}?${action}=true&work=${workTime}&rest=${restTime}&rounds=${rounds}`;
-    }
-
-    // Botones de control
-    document.getElementById('start-btn').addEventListener('click', () => {
-      window.open(generateUrl('start'), '_blank');
-    });
-
-    document.getElementById('pause-btn').addEventListener('click', () => {
-      window.open(generateUrl('pause'), '_blank');
-    });
-
-    document.getElementById('reset-btn').addEventListener('click', () => {
-      window.open(generateUrl('reset'), '_blank');
-    });
-
+    let isConnected = false;
     
+    // Conectar al TV
+    document.getElementById('connect-btn').addEventListener('click', () => {
+      const code = document.getElementById('pairing-code').value;
+      if (code.length === 4) {
+        localStorage.setItem('pairingCode', code);
+        isConnected = true;
+        document.getElementById('status').textContent = "Conectado!";
+        document.getElementById('start-btn').disabled = false;
+      }
+    });
+
+    // Enviar comando
+    document.getElementById('start-btn').addEventListener('click', () => {
+      if (!isConnected) return;
+      
+      const command = {
+        action: 'start',
+        work: parseInt(document.getElementById('work-time').value),
+        rest: parseInt(document.getElementById('rest-time').value),
+        timestamp: new Date().getTime() // Para evitar caché
+      };
+      
+      localStorage.setItem('remoteCommand', JSON.stringify(command));
+      alert("Comando enviado al TV!");
+    });
   </script>
 </body>
 </html>
