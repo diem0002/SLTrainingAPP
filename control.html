@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control Remoto Gym Timer</title>
+  <style>
+    body { 
+      font-family: Arial; 
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .control-panel {
+      display: grid;
+      gap: 15px;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+    button {
+      padding: 15px;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    #start-btn { background: #4CAF50; color: white; }
+    #pause-btn { background: #FFC107; }
+    #reset-btn { background: #F44336; color: white; }
+    input { padding: 10px; font-size: 1rem; }
+  </style>
+</head>
+<body>
+  <div class="control-panel">
+    <h2>🏋️ Control Remoto</h2>
+    
+    <label>Ejercicio (seg): <input type="number" id="workTime" value="30"></label>
+    <label>Descanso (seg): <input type="number" id="restTime" value="15"></label>
+    <label>Rondas: <input type="number" id="rounds" value="5"></label>
+    
+    <button id="start-btn">▶ Iniciar</button>
+    <button id="pause-btn">⏸ Pausar</button>
+    <button id="reset-btn">↻ Reiniciar</button>
+    
+    <div id="qr-container" style="margin-top: 20px;"></div>
+  </div>
+
+  <script>
+    // Generar URL de control
+    function generateUrl(action) {
+      const baseUrl = 'https://diem0002.github.io/SLTrainingAPP';
+      const workTime = document.getElementById('workTime').value;
+      const restTime = document.getElementById('restTime').value;
+      const rounds = document.getElementById('rounds').value;
+      
+      return `${baseUrl}?${action}=true&work=${workTime}&rest=${restTime}&rounds=${rounds}`;
+    }
+
+    // Botones de control
+    document.getElementById('start-btn').addEventListener('click', () => {
+      window.open(generateUrl('start'), '_blank');
+    });
+
+    document.getElementById('pause-btn').addEventListener('click', () => {
+      window.open(generateUrl('pause'), '_blank');
+    });
+
+    document.getElementById('reset-btn').addEventListener('click', () => {
+      window.open(generateUrl('reset'), '_blank');
+    });
+
+    // Generar QR (usando librería QRious)
+    function generateQR() {
+      const qrContainer = document.getElementById('qr-container');
+      qrContainer.innerHTML = '<h3>Escanear para conectar:</h3><canvas id="qr-code"></canvas>';
+      
+      const qr = new QRious({
+        element: document.getElementById('qr-code'),
+        value: window.location.href.replace('control.html', ''),
+        size: 200
+      });
+    }
+
+    // Cargar librería QR dinámicamente
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js';
+    script.onload = generateQR;
+    document.head.appendChild(script);
+  </script>
+</body>
+</html>

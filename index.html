@@ -53,5 +53,26 @@
   <audio id="beep-sound" src="sounds/beep.mp3"></audio>
 
   <script src="js/script.js"></script>
+
+  <!-- Agrega esto al final de tu <body> -->
+<script>
+  // Sistema de actualización via URL
+  function checkUrlParams() {
+    const params = new URLSearchParams(window.location.search);
+    
+    if(params.has('start')) {
+      workTime = parseInt(params.get('work')) || 30;
+      restTime = parseInt(params.get('rest')) || 15;
+      totalRounds = parseInt(params.get('rounds')) || 5;
+      startWorkout();
+    }
+    
+    if(params.has('pause')) togglePause();
+    if(params.has('reset')) resetTimer();
+  }
+
+  // Verificar cambios cada 2 segundos
+  setInterval(checkUrlParams, 2000);
+</script>
 </body>
 </html>
