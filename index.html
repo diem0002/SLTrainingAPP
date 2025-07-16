@@ -7,64 +7,77 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <header>
-    <h1>🏋️ Timer de Entrenamiento Pro</h1>
-  </header>
+  <div id="overlay" class="hidden"></div>
+  
+  <div id="config-container">
+    <header>
+      <h1>🏋️ Gym Timer Pro</h1>
+    </header>
 
-  <main>
     <form id="config-form">
-      <div id="custom-config">
-        <div class="time-input">
-          <label>Tiempo de ejercicio:</label>
-          <input type="number" id="workTime" value="30" min="1">
-          <select id="workTimeUnit">
-            <option value="seconds">Segundos</option>
-            <option value="minutes">Minutos</option>
-          </select>
-        </div>
+      <div class="input-row">
+  <div class="input-group">
+    <label>Ejercicio:</label>
+    <div class="input-wrapper">
+      <input type="number" id="workTime" value="30" min="1" placeholder="30">
+      <select id="workTimeUnit">
+        <option value="seconds">seg</option>
+        <option value="minutes">min</option>
+      </select>
+    </div>
+  </div>
 
-        <div class="time-input">
-          <label>Tiempo de descanso:</label>
-          <input type="number" id="restTime" value="10" min="0">
+      <div class="input-group">
+        <label>Descanso:</label>
+        <div class="input-wrapper">
+          <input type="number" id="restTime" value="10" min="0" placeholder="10">
           <select id="restTimeUnit">
-            <option value="seconds">Segundos</option>
-            <option value="minutes">Minutos</option>
+            <option value="seconds">seg</option>
+            <option value="minutes">min</option>
           </select>
         </div>
-
-        <label>Rondas: <input type="number" id="rounds" value="8" min="1"></label>
       </div>
 
-      <label for="mode">Modo de entrenamiento:</label>
-      <select id="mode">
-        <option value="hiit" selected>HIIT (Personalizado)</option>
-        <option value="tabata">Tabata (20s/10s ×8)</option>
-        <option value="amrap">AMRAP (X minutos)</option>
-        <option value="emom">EMOM (1min/ronda)</option>
-      </select>
-
-      <button type="submit" id="start-btn">Iniciar Entrenamiento</button>
-    </form>
-
-    <div id="countdown-display" style="display: none;">
-      <h2 id="countdown-text">Preparado</h2>
-      <div id="countdown">3</div>
+      <div class="input-group compact">
+        <label>Rondas:</label>
+        <input type="number" id="rounds" value="8" min="1" max="99" placeholder="8">
+      </div>
     </div>
 
-    <div id="timer-display" style="display: none;">
-      <h2 id="phase">Ejercicio</h2>
+      <div class="mode-select">
+        <label for="mode">Modo:</label>
+        <select id="mode">
+          <option value="hiit" selected>HIIT</option>
+          <option value="tabata">Tabata</option>
+          <option value="amrap">AMRAP</option>
+          <option value="emom">EMOM</option>
+        </select>
+      </div>
+
+      <button type="submit" id="start-btn">▶ Iniciar</button>
+    </form>
+  </div>
+
+  <div id="countdown-display" class="hidden">
+    <h2 id="countdown-text">PREPARADO</h2>
+    <div id="countdown">3</div>
+  </div>
+
+  <div id="timer-display" class="hidden">
+    <div id="timer-content">
+      <h2 id="phase">EJERCICIO</h2>
       <div id="time">00:00</div>
       <div class="progress-container">
         <div id="progress-bar"></div>
       </div>
-      <div id="round">Ronda 0/0</div>
+      <div id="round">Ronda 1/8</div>
       
       <div id="controls">
-        <button id="pause-btn">⏸ Pausar</button>
+        <button id="pause-btn">⏸ Pausa</button>
         <button id="reset-btn">↻ Reiniciar</button>
       </div>
     </div>
-  </main>
+  </div>
 
   <script src="js/script.js"></script>
 </body>
