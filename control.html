@@ -67,23 +67,7 @@
       window.open(generateUrl('reset'), '_blank');
     });
 
-    // Generar QR (usando librería QRious)
-    function generateQR() {
-      const qrContainer = document.getElementById('qr-container');
-      qrContainer.innerHTML = '<h3>Escanear para conectar:</h3><canvas id="qr-code"></canvas>';
-      
-      const qr = new QRious({
-        element: document.getElementById('qr-code'),
-        value: window.location.href.replace('control.html', ''),
-        size: 200
-      });
-    }
-
-    // Cargar librería QR dinámicamente
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js';
-    script.onload = generateQR;
-    document.head.appendChild(script);
+    
   </script>
 </body>
 </html>

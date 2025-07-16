@@ -74,5 +74,34 @@
   // Verificar cambios cada 2 segundos
   setInterval(checkUrlParams, 2000);
 </script>
+
+<!-- Contenedor QR (visible solo al inicio) -->
+<div id="qr-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000;">
+  <h2 style="color: white; margin-bottom: 20px;">Escanear con el celular:</h2>
+  <canvas id="qr-code" width="200" height="200"></canvas>
+  <button id="close-qr" style="margin-top: 30px; padding: 10px 20px; background: #ff3366; color: white; border: none; border-radius: 5px; cursor: pointer;">Cerrar</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
+<script>
+  // Generar QR con URL de control
+  const qr = new QRious({
+    element: document.getElementById('qr-code'),
+    value: window.location.href.replace('index.html', 'control.html'),
+    size: 300
+  });
+
+  // Cerrar el modal
+  document.getElementById('close-qr').addEventListener('click', () => {
+    document.getElementById('qr-modal').style.display = 'none';
+  });
+
+  // Mostrar QR al inicio (ocultar cuando el timer empiece)
+  setTimeout(() => {
+    if (!window.location.search.includes('start')) {
+      document.getElementById('qr-modal').style.display = 'flex';
+    }
+  }, 1000);
+</script>
 </body>
 </html>
