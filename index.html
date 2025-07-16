@@ -14,25 +14,35 @@
 
   <main>
     <form id="config-form">
-      <label>Tiempo de ejercicio (seg): <input type="number" id="workTime" value="30"></label>
-      <label>Tiempo de descanso (seg): <input type="number" id="restTime" value="15"></label>
-      <label>Rondas: <input type="number" id="rounds" value="5"></label>
-      <button type="submit">Iniciar</button>
+      <div id="custom-config">
+        <label>Tiempo de ejercicio (seg): <input type="number" id="workTime" value="30"></label>
+        <label>Tiempo de descanso (seg): <input type="number" id="restTime" value="15"></label>
+        <label>Rondas: <input type="number" id="rounds" value="5"></label>
+      </div>
 
-    <label for="mode">Modo de entrenamiento:</label>
-    <select id="mode">
-    <option value="hiit" selected>HIIT (Personalizado)</option>
-    <option value="tabata">Tabata (20s / 10s × 8)</option>
-    <option value="amrap">AMRAP (X minutos)</option>
-    <option value="emom">EMOM (1 ejercicio/minuto)</option>
-</select>
+      <label for="mode">Modo de entrenamiento:</label>
+      <select id="mode">
+        <option value="hiit" selected>HIIT (Personalizado)</option>
+        <option value="tabata">Tabata (20s / 10s × 8)</option>
+        <option value="amrap">AMRAP (X minutos)</option>
+        <option value="emom">EMOM (1 ejercicio/minuto)</option>
+      </select>
 
+      <button type="submit" id="start-btn">Iniciar</button>
     </form>
 
-    <div id="timer-display">
+    <div id="timer-display" style="display: none;">
       <h2 id="phase">Listo</h2>
       <div id="time">00:00</div>
-      <div id="round">Ronda 0</div>
+      <div class="progress-container">
+        <div id="progress-bar"></div>
+      </div>
+      <div id="round">Ronda 0/0</div>
+      
+      <div id="controls">
+        <button id="pause-btn">⏸ Pausar</button>
+        <button id="reset-btn">↻ Reiniciar</button>
+      </div>
     </div>
   </main>
 
