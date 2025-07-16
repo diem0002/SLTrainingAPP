@@ -217,3 +217,30 @@ button:hover { background: #e62e5c; }
   #time { font-size: 4.5rem; }
   #countdown { font-size: 6rem; }
 }
+
+
+/* [AGREGA al final del archivo] */
+body::before {
+  content: "";
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-150%, -45%);
+  width: 600px;
+  height: 600px;
+  background-image: url('../img/logo.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0.6;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Para pantallas grandes */
+@media (min-width: 768px) {
+  body::before {
+    width: 400px;
+    height: 400px;
+  }
+}
