@@ -48,6 +48,16 @@ button:hover {
   background-color: #e62e5c;
 }
 
+#qr-modal {
+  font-family: 'Segoe UI', sans-serif;
+  text-align: center;
+}
+
+#qr-code {
+  border: 10px solid white;
+  border-radius: 10px;
+} 
+
 #timer-display {
   font-size: 2rem;
   margin-top: 30px;
