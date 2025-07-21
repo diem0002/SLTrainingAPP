@@ -1,19 +1,14 @@
 {
-  "name": "Gym Timer TV",
-  "short_name": "GymTimer",
+  "name": "Timer de Entrenamiento",
+  "short_name": "Timer",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#111111",
+  "background_color": "#000000",
   "theme_color": "#ff3366",
   "icons": [
     {
-      "src": "img/icon-192.png",
+      "src": "img/logo.png",
       "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "img/icon-512.png",
-      "sizes": "512x512",
       "type": "image/png"
     }
   ]
