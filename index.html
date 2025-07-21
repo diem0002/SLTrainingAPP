@@ -1,97 +1,66 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gym Timer Pro</title>
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="manifest" href="./manifest.json">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Timer de Entrenamiento</title>
+  <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-  <div id="overlay" class="hidden"></div>
-  
-  <div id="config-container">
-    <header>
-      <h1>🏋️</h1>
-    </header>
+  <div class="logo-container">
+    <img src="img/logo.png" alt="Logo" class="logo" />
+  </div>
 
-    <form id="config-form">
-      <div class="input-row">
-  <div class="input-group">
-    <label>Ejercicio:</label>
-    <div class="input-wrapper">
-      <input type="number" id="workTime" value="30" min="1" placeholder="30">
-      <select id="workTimeUnit">
-        <option value="seconds">seg</option>
-        <option value="minutes">min</option>
+  <div class="container" id="configContainer">
+    <h1>⏱️ Timer de Entrenamiento</h1>
+
+    <div class="form-group">
+      <label for="modeSelect">Modo:</label>
+      <select id="modeSelect">
+        <option value="custom">Personalizado</option>
+        <option value="tabata">Tabata</option>
+        <option value="emom">EMOM</option>
+        <option value="amrap">AMRAP</option>
       </select>
     </div>
-  </div>
 
-      <div class="input-group">
-        <label>Descanso:</label>
-        <div class="input-wrapper">
-          <input type="number" id="restTime" value="10" min="0" placeholder="10">
-          <select id="restTimeUnit">
-            <option value="seconds">seg</option>
-            <option value="minutes">min</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="input-group compact">
-        <label>Rondas:</label>
-        <input type="number" id="rounds" value="8" min="1" max="99" placeholder="8">
-      </div>
+    <div class="form-group">
+      <label for="workTime">Tiempo de trabajo:</label>
+      <input type="number" id="workTime" min="1" value="20" />
+      <select id="workTimeUnit">
+        <option value="seconds">Segundos</option>
+        <option value="minutes">Minutos</option>
+      </select>
     </div>
 
-      <div class="mode-select">
-        <label for="mode">Modo:</label>
-        <select id="mode">
-          <option value="hiit" selected>HIIT</option>
-          <option value="tabata">Tabata</option>
-          <option value="amrap">AMRAP</option>
-          <option value="emom">EMOM</option>
-        </select>
-      </div>
+    <div class="form-group">
+      <label for="restTime">Tiempo de descanso:</label>
+      <input type="number" id="restTime" min="0" value="10" />
+      <select id="restTimeUnit">
+        <option value="seconds">Segundos</option>
+        <option value="minutes">Minutos</option>
+      </select>
+    </div>
 
-      <button type="submit" id="start-btn">▶ Iniciar</button>
-    </form>
+    <div class="form-group">
+      <label for="rounds">Rondas:</label>
+      <input type="number" id="rounds" min="1" value="8" />
+    </div>
+
+    <div class="controls">
+      <button id="startBtn">Iniciar</button>
+      <button id="resetBtn" disabled>Reiniciar</button>
+    </div>
   </div>
 
-  <div id="countdown-display" class="hidden">
-    <h2 id="countdown-text">PREPARADO</h2>
-    <div id="countdown">3</div>
-  </div>
-
-  <div id="timer-display" class="hidden">
-    <div id="timer-content">
-      <h2 id="phase">EJERCICIO</h2>
-      <div id="time">00:00</div>
-      <div class="progress-container">
-        <div id="progress-bar"></div>
-      </div>
-      <div id="round">Ronda 1/8</div>
-      
-      <div id="controls">
-        <button id="pause-btn">⏸ Pausa</button>
-        <button id="reset-btn">↻ Reiniciar</button>
-      </div>
+  <div id="overlay">
+    <div id="timerDisplay">00:00</div>
+    <div id="roundDisplay"></div>
+    <div class="timer-controls">
+      <button id="exitBtn">Salir</button>
     </div>
   </div>
 
   <script src="js/script.js"></script>
-
-  <script>
-  window.addEventListener('load', () => {
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js')
-        .then(reg => console.log('SW registrado!', reg))
-        .catch(err => console.log('Error SW:', err));
-    }
-  });
-</script>
-
-
 </body>
 </html>
