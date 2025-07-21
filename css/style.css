@@ -162,3 +162,17 @@ button:disabled {
     font-size: 1.8rem;
   }
 }
+body.active-work {
+  background-color: #81c784 !important; /* Verde claro */
+  background-image: none;
+}
+
+body.active-rest {
+  background-color: #64b5f6 !important; /* Celeste claro */
+  background-image: none;
+}
+
+body.active-finish {
+  background-color: #ef9a9a !important; /* Rojo claro */
+  background-image: none;
+}

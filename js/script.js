@@ -28,7 +28,6 @@ function startWorkoutSession() {
   if (workUnit === "minutes") workTime *= 60;
   if (restUnit === "minutes") restTime *= 60;
 
-  // Ajustes según modo
   if (mode === "tabata") {
     workTime = 20;
     restTime = 10;
@@ -36,7 +35,7 @@ function startWorkoutSession() {
     workTime = 60;
     restTime = 0;
   } else if (mode === "amrap") {
-    workTime = 600; // 10 min AMRAP
+    workTime = 600;
     restTime = 0;
   }
 
@@ -51,22 +50,22 @@ function startWorkoutSession() {
 
   configContainer.style.display = "none";
   overlay.style.display = "flex";
+  document.body.classList.remove("active-finish", "active-rest");
+  document.body.classList.add("active-work");
 
   currentRound = 1;
   isWorkingPhase = true;
   timeLeft = workTime;
+
+  window.workTimeGlobal = workTime;
+  window.restTimeGlobal = restTime;
+  window.totalRoundsGlobal = rounds;
 
   updateDisplay(timeLeft, currentRound);
   resetBtn.disabled = false;
   startBtn.disabled = true;
 
   playStartSound();
-
-  // Guardar valores en variables globales para usarlas en el tick
-  window.workTimeGlobal = workTime;
-  window.restTimeGlobal = restTime;
-  window.totalRoundsGlobal = rounds;
-
   intervalId = setInterval(timerTick, 1000);
 }
 
@@ -78,6 +77,8 @@ function timerTick() {
       isWorkingPhase = false;
       timeLeft = window.restTimeGlobal;
       playRestSound();
+      document.body.classList.remove("active-work", "active-finish");
+      document.body.classList.add("active-rest");
     } else {
       currentRound++;
       if (currentRound > window.totalRoundsGlobal) {
@@ -87,6 +88,8 @@ function timerTick() {
         isWorkingPhase = true;
         timeLeft = window.workTimeGlobal;
         playStartSound();
+        document.body.classList.remove("active-rest", "active-finish");
+        document.body.classList.add("active-work");
       }
     }
   }
@@ -110,6 +113,8 @@ function finishTimer() {
   roundDisplay.textContent = "✅ ¡Entrenamiento finalizado!";
   startBtn.disabled = false;
   resetBtn.disabled = true;
+  document.body.classList.remove("active-work", "active-rest");
+  document.body.classList.add("active-finish");
   playEndSound();
 }
 
@@ -122,6 +127,7 @@ function resetTimer() {
   isWorkingPhase = true;
   timerDisplay.textContent = "00:00";
   roundDisplay.textContent = "";
+  document.body.classList.remove("active-work", "active-rest", "active-finish");
 }
 
 function exitTimer() {
@@ -182,6 +188,8 @@ function playTone(freq, duration) {
     console.error("Error de audio:", e);
   }
 }
+
+// Instalación como PWA
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('service-worker.js')
     .then(() => console.log('Service Worker registrado'))
