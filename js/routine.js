@@ -35,6 +35,13 @@ window.initRoutineSystem = function() {
   document.getElementById('add-block-btn').addEventListener('click', addBlock);
   document.getElementById('save-routine-btn').addEventListener('click', saveRoutine);
   document.getElementById('cancel-routine-btn').addEventListener('click', hideRoutineModal);
+
+  // Delegación para eliminar ejercicios
+  document.getElementById('blocks-container').addEventListener('click', function(event) {
+    if (event.target.classList.contains('remove-exercise')) {
+      event.target.closest('div').remove();
+    }
+  });
   
   // Cargar rutina guardada
   loadSavedRoutine();
