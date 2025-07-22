@@ -212,16 +212,7 @@ stopBtn.onclick = function() {
   stopTimer();
 };
 
-toggleRoutineBtn.onclick = function() {
-  const routineDisplay = document.getElementById('routine-display');
-  if (routineDisplay.style.display === 'none') {
-    routineDisplay.style.display = 'flex';
-    this.textContent = 'Ocultar Rutinas';
-  } else {
-    routineDisplay.style.display = 'none';
-    this.textContent = 'Mostrar Rutinas';
-  }
-};
+
 
 // Cargar rutinas al iniciar
 window.addEventListener('DOMContentLoaded', function() {

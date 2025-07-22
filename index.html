@@ -2,63 +2,68 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Gym Timer Simple</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Gym Timer TV</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-
   <div class="main-container">
     <header>
       <img src="img/logo.png" alt="Logo Gimnasio" class="logo" />
     </header>
 
+    <!-- Timer View (arriba) -->
+    <section id="timer-view" aria-live="polite">
+      <div id="phase-display">Trabajo</div>
+      <div id="timer-display">00:00</div>
+      <div id="round-display">Ronda 1 / 5</div>
+      <div id="controls-container">
+        <button id="btn-pause">Pausar</button>
+        <button id="btn-reset">Reiniciar</button>
+        <button id="btn-stop">Terminar</button>
+      </div>
+    </section>
+
+    <!-- Configuración inicial -->
     <section id="preset-container">
       <div class="timer-settings">
-        <label class="input-group">
-          <span>Trabajo:</span>
-          <input type="number" id="custom-work" min="1" max="99" value="30" class="time-input" />
-          <select id="custom-work-unit" class="unit-select">
-            <option value="sec" selected>seg</option>
-            <option value="min">min</option>
-          </select>
-        </label>
+        <div class="input-row">
+          <label class="input-group">
+            <span>Trabajo:</span>
+            <input type="number" id="custom-work" min="1" max="99" value="30" class="time-input" />
+            <select id="custom-work-unit" class="unit-select">
+              <option value="sec" selected>seg</option>
+              <option value="min">min</option>
+            </select>
+          </label>
+          
+          <label class="input-group">
+            <span>Descanso:</span>
+            <input type="number" id="custom-rest" min="0" max="99" value="15" class="time-input" />
+            <select id="custom-rest-unit" class="unit-select">
+              <option value="sec" selected>seg</option>
+              <option value="min">min</option>
+            </select>
+          </label>
+        </div>
         
-        <label class="input-group">
-          <span>Descanso:</span>
-          <input type="number" id="custom-rest" min="0" max="99" value="15" class="time-input" />
-          <select id="custom-rest-unit" class="unit-select">
-            <option value="sec" selected>seg</option>
-            <option value="min">min</option>
-          </select>
-        </label>
-        
-        <label class="input-group">
-          <span>Rondas:</span>
-          <input type="number" id="custom-rounds" min="1" max="99" value="5" class="rounds-input" />
-        </label>
+        <div class="input-row">
+          <label class="input-group">
+            <span>Rondas:</span>
+            <input type="number" id="custom-rounds" min="1" max="99" value="5" class="rounds-input" />
+          </label>
+        </div>
         
         <div class="button-group">
           <button id="start-btn">Iniciar Timer</button>
           <button id="create-routine-btn" class="routine-btn">Editar Rutinas</button>
-          <button id="toggle-routine-btn" class="routine-btn">Mostrar/Ocultar Rutinas</button>
+          <button id="toggle-routine-btn" class="routine-btn">Mostrar Rutinas</button>
         </div>
       </div>
     </section>
 
-    <div class="display-container">
-      <div id="routine-display"></div>
-      <section id="timer-view" aria-live="polite" style="display:none;">
-        <div id="phase-display">Trabajo</div>
-        <div id="timer-display">00:00</div>
-        <div id="round-display">Ronda 1 / 5</div>
-        <div id="controls-container">
-          <button id="btn-pause">Pausar</button>
-          <button id="btn-reset">Reiniciar</button>
-          <button id="btn-stop">Terminar</button>
-        </div>
-      </section>
-    </div>
+    <!-- Contenedor de Rutinas (abajo) -->
+    <div id="routine-display" class="routine-display-hidden"></div>
   </div>
 
   <audio id="sound-start" src="sounds/start.mp3" preload="auto"></audio>
