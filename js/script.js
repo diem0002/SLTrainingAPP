@@ -1,218 +1,231 @@
-let intervalId = null;
+// Elementos del DOM
+const timerDisplay = document.getElementById('timer-display');
+const phaseDisplay = document.getElementById('phase-display');
+const roundDisplay = document.getElementById('round-display');
+const startBtn = document.getElementById('start-btn');
+const pauseBtn = document.getElementById('btn-pause');
+const resetBtn = document.getElementById('btn-reset');
+const stopBtn = document.getElementById('btn-stop');
+const soundStartRing = document.getElementById('sound-startRing');
+const toggleRoutineBtn = document.getElementById('toggle-routine-btn');
+
+// Configuración
+soundStartRing.volume = 1.0;
+
+// Variables del temporizador
+let workDuration, restDuration, totalRounds;
 let currentRound = 1;
-let isWorkingPhase = true;
+let isWorking = true;
 let timeLeft = 0;
+let timer = null;
+let isPaused = false;
+let isStopped = false;
 
-const startBtn = document.getElementById("startBtn");
-const resetBtn = document.getElementById("resetBtn");
-const exitBtn = document.getElementById("exitBtn");
-const overlay = document.getElementById("overlay");
-const timerDisplay = document.getElementById("timerDisplay");
-const roundDisplay = document.getElementById("roundDisplay");
-const configContainer = document.getElementById("configContainer");
+// Iniciar temporizador
+startBtn.onclick = function() {
+  isStopped = false;
+  
+  const work = parseInt(document.getElementById('custom-work').value);
+  const rest = parseInt(document.getElementById('custom-rest').value);
+  const rounds = parseInt(document.getElementById('custom-rounds').value);
+  const workUnit = document.getElementById('custom-work-unit').value;
+  const restUnit = document.getElementById('custom-rest-unit').value;
 
-startBtn.addEventListener("click", startWorkoutSession);
-resetBtn.addEventListener("click", resetTimer);
-exitBtn.addEventListener("click", exitTimer);
+  workDuration = workUnit === 'min' ? work * 60 : work;
+  restDuration = restUnit === 'min' ? rest * 60 : rest;
+  totalRounds = rounds;
 
-function startWorkoutSession() {
-  const mode = document.getElementById("modeSelect").value;
-
-  let workTime = parseInt(document.getElementById("workTime").value);
-  let restTime = parseInt(document.getElementById("restTime").value);
-  const rounds = parseInt(document.getElementById("rounds").value);
-
-  const workUnit = document.getElementById("workTimeUnit").value;
-  const restUnit = document.getElementById("restTimeUnit").value;
-
-  if (workUnit === "minutes") workTime *= 60;
-  if (restUnit === "minutes") restTime *= 60;
-
-  if (mode === "tabata") {
-    workTime = 20;
-    restTime = 10;
-  } else if (mode === "emom") {
-    workTime = 60;
-    restTime = 0;
-  } else if (mode === "amrap") {
-    workTime = 600;
-    restTime = 0;
-  }
-
-  if (workTime <= 0) {
-    alert("El tiempo de trabajo debe ser mayor a 0");
-    return;
-  }
-  if (rounds <= 0) {
-    alert("Las rondas deben ser mayores a 0");
-    return;
-  }
-
-  configContainer.style.display = "none";
-  overlay.style.display = "flex";
-  document.body.classList.remove("active-finish", "active-rest");
-  document.body.classList.add("active-work");
-
+  document.getElementById('preset-container').style.display = 'none';
+  document.getElementById('timer-view').style.display = 'flex';
+  
   currentRound = 1;
-  isWorkingPhase = true;
-  timeLeft = workTime;
+  isWorking = true;
+  timeLeft = workDuration;
+  isPaused = false;
+  
+  updateDisplay();
+  
+  playStartRing(() => {
+    if (!isStopped) {
+      timer = setInterval(tick, 1000);
+    }
+  });
+};
 
-  window.workTimeGlobal = workTime;
-  window.restTimeGlobal = restTime;
-  window.totalRoundsGlobal = rounds;
-
-  updateDisplay(timeLeft, currentRound);
-  resetBtn.disabled = false;
-  startBtn.disabled = true;
-
-  playStartSound();
-  intervalId = setInterval(timerTick, 1000);
+function playStartRing(callback) {
+  if (!soundStartRing || isStopped) {
+    if (callback) callback();
+    return;
+  }
+  
+  soundStartRing.currentTime = 0;
+  soundStartRing.play()
+    .then(() => {
+      if (callback && !isStopped) setTimeout(callback, 2000);
+    })
+    .catch(e => {
+      console.error("Error al reproducir sonido:", e);
+      if (callback) callback();
+    });
 }
 
-function timerTick() {
+function tick() {
+  if (isPaused || isStopped) return;
+  
   timeLeft--;
-
-  if (timeLeft <= 0) {
-    if (isWorkingPhase && window.restTimeGlobal > 0) {
-      isWorkingPhase = false;
-      timeLeft = window.restTimeGlobal;
-      playRestSound();
-      document.body.classList.remove("active-work", "active-finish");
-      document.body.classList.add("active-rest");
-    } else {
-      currentRound++;
-      if (currentRound > window.totalRoundsGlobal) {
-        finishTimer();
-        return;
+  updateDisplay();
+  
+  if (timeLeft < 0) {
+    if (isWorking) {
+      if (restDuration > 0) {
+        switchToRest();
       } else {
-        isWorkingPhase = true;
-        timeLeft = window.workTimeGlobal;
-        playStartSound();
-        document.body.classList.remove("active-rest", "active-finish");
-        document.body.classList.add("active-work");
+        nextRoundOrFinish();
       }
+    } else {
+      nextRoundOrFinish();
     }
   }
-
-  updateDisplay(timeLeft, currentRound);
-  if (timeLeft <= 3 && timeLeft > 0) playBeepSound();
 }
 
-function updateDisplay(time, round) {
-  const minutes = Math.floor(time / 60);
-  const seconds = time % 60;
-  timerDisplay.textContent =
-    `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
-  roundDisplay.textContent =
-    (isWorkingPhase ? "Ejercicio" : "Descanso") + ` - Ronda ${round} / ${window.totalRoundsGlobal}`;
+function switchToRest() {
+  if (isStopped) return;
+  
+  isWorking = false;
+  timeLeft = restDuration;
+  updateDisplay();
+  playStartRing();
 }
 
-function finishTimer() {
-  clearInterval(intervalId);
-  timerDisplay.textContent = "00:00";
-  roundDisplay.textContent = "✅ ¡Entrenamiento finalizado!";
-  startBtn.disabled = false;
-  resetBtn.disabled = true;
-  document.body.classList.remove("active-work", "active-rest");
-  document.body.classList.add("active-finish");
-  playEndSound();
+function nextRoundOrFinish() {
+  if (isStopped) return;
+  
+  currentRound++;
+  
+  if (currentRound > totalRounds) {
+    finishWorkout();
+  } else {
+    startNewRound();
+  }
+}
+
+function finishWorkout() {
+  clearInterval(timer);
+  timer = null;
+  document.getElementById('timer-view').className = 'finished';
+  document.body.className = 'finished';
+  phaseDisplay.textContent = 'Terminado';
+  timerDisplay.textContent = '00:00';
+  roundDisplay.textContent = '';
+  stopAllSounds();
+}
+
+function startNewRound() {
+  if (isStopped) return;
+  
+  isWorking = true;
+  timeLeft = workDuration;
+  updateDisplay();
+  playStartRing();
 }
 
 function resetTimer() {
-  clearInterval(intervalId);
-  startBtn.disabled = false;
-  resetBtn.disabled = true;
-  timeLeft = 0;
+  isStopped = false;
+  isWorking = true;
   currentRound = 1;
-  isWorkingPhase = true;
-  timerDisplay.textContent = "00:00";
-  roundDisplay.textContent = "";
-  document.body.classList.remove("active-work", "active-rest", "active-finish");
-}
-
-function exitTimer() {
-  resetTimer();
-  overlay.style.display = "none";
-  configContainer.style.display = "block";
-}
-
-// Sonidos simples con Web Audio API
-function playBeepSound() {
-  playTone(440, 0.15);
-}
-
-function playStartSound() {
-  playTone(880, 0.3);
-}
-
-function playRestSound() {
-  playTone(660, 0.3);
-}
-
-function playEndSound() {
-  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  const oscillator = audioCtx.createOscillator();
-  const gainNode = audioCtx.createGain();
-
-  oscillator.type = "sine";
-  oscillator.frequency.setValueAtTime(784, audioCtx.currentTime);
-  oscillator.frequency.exponentialRampToValueAtTime(261.63, audioCtx.currentTime + 1);
-
-  oscillator.connect(gainNode);
-  gainNode.connect(audioCtx.destination);
-
-  gainNode.gain.setValueAtTime(1, audioCtx.currentTime);
-  gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1);
-
-  oscillator.start();
-  oscillator.stop(audioCtx.currentTime + 1);
-}
-
-function playTone(freq, duration) {
-  try {
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const oscillator = audioCtx.createOscillator();
-    const gainNode = audioCtx.createGain();
-
-    oscillator.type = "sine";
-    oscillator.frequency.value = freq;
-    oscillator.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
-
-    gainNode.gain.setValueAtTime(1, audioCtx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-
-    oscillator.start();
-    oscillator.stop(audioCtx.currentTime + duration);
-  } catch (e) {
-    console.error("Error de audio:", e);
-  }
-}
-
-// Instalación como PWA
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('service-worker.js')
-    .then(() => console.log('Service Worker registrado'))
-    .catch(err => console.error('Error al registrar el Service Worker', err));
-}
-
-let deferredPrompt;
-const installBtn = document.getElementById('installBtn');
-
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  installBtn.style.display = 'inline-block';
-});
-
-installBtn.addEventListener('click', async () => {
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      console.log('App instalada');
+  timeLeft = workDuration;
+  isPaused = false;
+  updateDisplay();
+  
+  stopAllSounds();
+  clearInterval(timer);
+  
+  playStartRing(() => {
+    if (!isStopped) {
+      timer = setInterval(tick, 1000);
     }
-    deferredPrompt = null;
-    installBtn.style.display = 'none';
+  });
+}
+
+function stopTimer() {
+  isStopped = true;
+  clearInterval(timer);
+  timer = null;
+  isPaused = false;
+  
+  document.getElementById('preset-container').style.display = 'flex';
+  document.getElementById('timer-view').style.display = 'none';
+  
+  stopAllSounds();
+  
+  document.body.className = '';
+  document.getElementById('timer-view').className = '';
+  pauseBtn.textContent = 'Pausar';
+}
+
+function stopAllSounds() {
+  var sounds = [
+    document.getElementById('sound-start'),
+    document.getElementById('sound-beep'),
+    document.getElementById('sound-end'),
+    document.getElementById('sound-startRing')
+  ];
+  
+  sounds.forEach(function(sound) {
+    if (sound) {
+      sound.pause();
+      sound.currentTime = 0;
+    }
+  });
+}
+
+function updateDisplay() {
+  if (isStopped) return;
+  
+  const displayTime = Math.max(0, timeLeft);
+  const min = Math.floor(displayTime / 60).toString().padStart(2, '0');
+  const sec = (displayTime % 60).toString().padStart(2, '0');
+  timerDisplay.textContent = `${min}:${sec}`;
+  
+  phaseDisplay.textContent = isWorking ? 'Trabajo' : 'Descanso';
+  roundDisplay.textContent = `Ronda ${currentRound} / ${totalRounds}`;
+  
+  const bgClass = isPaused ? 'paused' : (isWorking ? 'active-work' : 'active-rest');
+  document.getElementById('timer-view').className = bgClass;
+  document.body.className = bgClass;
+}
+
+// Controladores de eventos
+pauseBtn.onclick = function() {
+  if (isStopped) return;
+  
+  isPaused = !isPaused;
+  pauseBtn.textContent = isPaused ? 'Continuar' : 'Pausar';
+  updateDisplay();
+};
+
+resetBtn.onclick = function() {
+  resetTimer();
+};
+
+stopBtn.onclick = function() {
+  stopTimer();
+};
+
+toggleRoutineBtn.onclick = function() {
+  const routineDisplay = document.getElementById('routine-display');
+  if (routineDisplay.style.display === 'none') {
+    routineDisplay.style.display = 'flex';
+    this.textContent = 'Ocultar Rutinas';
+  } else {
+    routineDisplay.style.display = 'none';
+    this.textContent = 'Mostrar Rutinas';
+  }
+};
+
+// Cargar rutinas al iniciar
+window.addEventListener('DOMContentLoaded', function() {
+  if (typeof loadSavedRoutine === 'function') {
+    loadSavedRoutine();
   }
 });

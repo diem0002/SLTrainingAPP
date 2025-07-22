@@ -1,0 +1,114 @@
+/* Estilos del modal */
+#routine-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.8);
+  z-index: 1000;
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+
+#routine-modal > div {
+  background: #222;
+  padding: 20px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow: auto;
+}
+
+.block {
+  background: #333;
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+}
+
+.block-header {
+  display: flex;
+  margin-bottom: 10px;
+}
+
+.block-title {
+  flex-grow: 1;
+  padding: 8px;
+  font-size: 16px;
+  border-radius: 5px;
+  border: 1px solid #555;
+  background: #222;
+  color: white;
+}
+
+.remove-block {
+  background: #ff0000;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  width: 30px;
+  height: 30px;
+  margin-left: 10px;
+  cursor: pointer;
+}
+
+.exercise {
+  display: flex;
+  margin-bottom: 8px;
+}
+
+.exercise input {
+  flex-grow: 1;
+  padding: 8px;
+  border-radius: 5px;
+  border: 1px solid #555;
+  background: #222;
+  color: white;
+}
+
+.remove-exercise {
+  background: #555;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  width: 30px;
+  margin-left: 5px;
+  cursor: pointer;
+}
+
+.add-exercise {
+  background: #005577;
+  color: white;
+  border: none;
+  padding: 8px;
+  border-radius: 5px;
+  width: 100%;
+  margin-top: 5px;
+  cursor: pointer;
+}
+
+#add-block-btn, #save-routine-btn, #cancel-routine-btn {
+  padding: 10px;
+  font-size: 16px;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  width: 100%;
+}
+
+#add-block-btn {
+  background: #007700;
+  margin-top: 10px;
+}
+
+#save-routine-btn {
+  background: #007700;
+}
+
+#cancel-routine-btn {
+  background: #770000;
+}

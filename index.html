@@ -3,69 +3,70 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Timer de Entrenamiento</title>
+  <title>Gym Timer Simple</title>
   <link rel="stylesheet" href="css/style.css" />
-  <link rel="manifest" href="manifest.json" />
 </head>
 <body>
-  <div class="logo-container">
-    <img src="img/logo.png" alt="Logo" class="logo" />
+
+  <div class="main-container">
+    <header>
+      <img src="img/logo.png" alt="Logo Gimnasio" class="logo" />
+    </header>
+
+    <section id="preset-container">
+      <div class="timer-settings">
+        <label class="input-group">
+          <span>Trabajo:</span>
+          <input type="number" id="custom-work" min="1" max="99" value="30" class="time-input" />
+          <select id="custom-work-unit" class="unit-select">
+            <option value="sec" selected>seg</option>
+            <option value="min">min</option>
+          </select>
+        </label>
+        
+        <label class="input-group">
+          <span>Descanso:</span>
+          <input type="number" id="custom-rest" min="0" max="99" value="15" class="time-input" />
+          <select id="custom-rest-unit" class="unit-select">
+            <option value="sec" selected>seg</option>
+            <option value="min">min</option>
+          </select>
+        </label>
+        
+        <label class="input-group">
+          <span>Rondas:</span>
+          <input type="number" id="custom-rounds" min="1" max="99" value="5" class="rounds-input" />
+        </label>
+        
+        <div class="button-group">
+          <button id="start-btn">Iniciar Timer</button>
+          <button id="create-routine-btn" class="routine-btn">Editar Rutinas</button>
+          <button id="toggle-routine-btn" class="routine-btn">Mostrar/Ocultar Rutinas</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="display-container">
+      <div id="routine-display"></div>
+      <section id="timer-view" aria-live="polite" style="display:none;">
+        <div id="phase-display">Trabajo</div>
+        <div id="timer-display">00:00</div>
+        <div id="round-display">Ronda 1 / 5</div>
+        <div id="controls-container">
+          <button id="btn-pause">Pausar</button>
+          <button id="btn-reset">Reiniciar</button>
+          <button id="btn-stop">Terminar</button>
+        </div>
+      </section>
+    </div>
   </div>
-  
-  <div class="container" id="configContainer">
-    <h1>⏱️ Timer de Entrenamiento</h1>
 
-    <div class="form-group">
-      <label for="modeSelect">Modo:</label>
-      <select id="modeSelect">
-        <option value="custom">Personalizado</option>
-        <option value="tabata">Tabata</option>
-        <option value="emom">EMOM</option>
-        <option value="amrap">AMRAP</option>
-      </select>
-    </div>
-
-    <div class="form-group">
-      <label for="workTime">Tiempo de trabajo:</label>
-      <input type="number" id="workTime" min="1" value="20" />
-      <select id="workTimeUnit">
-        <option value="seconds">Segundos</option>
-        <option value="minutes">Minutos</option>
-      </select>
-    </div>
-
-    <div class="form-group">
-      <label for="restTime">Tiempo de descanso:</label>
-      <input type="number" id="restTime" min="0" value="10" />
-      <select id="restTimeUnit">
-        <option value="seconds">Segundos</option>
-        <option value="minutes">Minutos</option>
-      </select>
-    </div>
-
-    <div class="form-group">
-      <label for="rounds">Rondas:</label>
-      <input type="number" id="rounds" min="1" value="8" />
-    </div>
-
-    <div class="controls">
-      <button id="startBtn">Iniciar</button>
-      <button id="resetBtn" disabled>Reiniciar</button>
-    </div>
-  </div>
-
-  <div id="overlay">
-    <div id="timerDisplay">00:00</div>
-    <div id="roundDisplay"></div>
-    <div class="timer-controls">
-      <button id="exitBtn">Salir</button>
-    </div>
-  </div>
-
-  <div class="controls">
-    <button id="installBtn" style="display: none;">📲 Instalar App</button>
-  </div>
+  <audio id="sound-start" src="sounds/start.mp3" preload="auto"></audio>
+  <audio id="sound-beep" src="sounds/beep.mp3" preload="auto"></audio>
+  <audio id="sound-end" src="sounds/end.mp3" preload="auto"></audio>
+  <audio id="sound-startRing" src="sounds/StartRing.mp3" preload="auto"></audio>
 
   <script src="js/script.js"></script>
+  <script src="js/routine.js"></script>
 </body>
 </html>
