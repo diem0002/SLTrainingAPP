@@ -1,10 +1,11 @@
 var routineData = [];
 var routineSystemInitialized = false;
+var savedRoutinesKey = 'savedGymRoutines'; // clave para rutinas completas guardadas
 
 // Función de inicialización
 window.initRoutineSystem = function() {
   if (routineSystemInitialized) return;
-  
+
   // Cargar CSS
   if (!document.getElementById('routine-css')) {
     var css = document.createElement('link');
@@ -13,12 +14,23 @@ window.initRoutineSystem = function() {
     css.href = 'css/routine.css';
     document.head.appendChild(css);
   }
-  
+
   // Crear estructura modal
   var modalHTML = `
     <div id="routine-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:1000;justify-content:center;align-items:center;">
       <div style="background:#222;padding:20px;border-radius:10px;width:90%;max-width:600px;max-height:90vh;overflow:auto;">
         <h2 style="color:#fff;text-align:center;margin-top:0;">Editor de Rutinas</h2>
+
+        <!-- Selector de rutinas guardadas -->
+        <div style="margin-bottom:15px;">
+          <label for="saved-routines-select" style="color:#fff;">Rutinas guardadas:</label>
+          <select id="saved-routines-select" style="width:100%;padding:8px;border-radius:5px;border:none;background:#333;color:#fff;margin-top:5px;"></select>
+          <div style="margin-top:5px;display:flex;gap:10px;">
+            <button id="load-saved-routine-btn" style="flex:1;background:#005577;color:#fff;border:none;padding:8px;border-radius:5px;cursor:pointer;">Cargar Rutina</button>
+            <button id="delete-saved-routine-btn" style="flex:1;background:#aa0000;color:#fff;border:none;padding:8px;border-radius:5px;cursor:pointer;">Eliminar Rutina</button>
+          </div>
+        </div>
+
         <div id="blocks-container"></div>
         <button id="add-block-btn" style="background:#007700;color:#fff;border:none;padding:10px;margin-top:15px;border-radius:8px;width:100%;font-size:16px;">+ Agregar Bloque</button>
         <div style="display:flex;justify-content:space-between;margin-top:15px;gap:10px;">
@@ -28,13 +40,17 @@ window.initRoutineSystem = function() {
       </div>
     </div>
   `;
-  
+
   document.body.insertAdjacentHTML('beforeend', modalHTML);
-  
+
   // Asignar eventos
   document.getElementById('add-block-btn').addEventListener('click', addBlock);
   document.getElementById('save-routine-btn').addEventListener('click', saveRoutine);
   document.getElementById('cancel-routine-btn').addEventListener('click', hideRoutineModal);
+
+  // Eventos para guardar, cargar y borrar rutinas guardadas
+  document.getElementById('load-saved-routine-btn').addEventListener('click', loadSelectedSavedRoutine);
+  document.getElementById('delete-saved-routine-btn').addEventListener('click', deleteSelectedSavedRoutine);
 
   // Delegación para eliminar ejercicios
   document.getElementById('blocks-container').addEventListener('click', function(event) {
@@ -42,37 +58,20 @@ window.initRoutineSystem = function() {
       event.target.closest('div').remove();
     }
   });
-  
-  // Cargar rutina guardada
-  loadSavedRoutine();
-  
+
   routineSystemInitialized = true;
+
+  // Cargar rutinas guardadas en el select y cargar la rutina activa (si hay)
+  loadSavedRoutinesList();
+  loadSavedRoutine();
 };
 
 // Mostrar modal de rutinas
 window.showRoutineModal = function() {
   if (!routineSystemInitialized) return;
-  
+
   document.getElementById('routine-modal').style.display = 'flex';
-  
-  // Agregar botón de limpiar si hay rutinas
-  const saveBtnContainer = document.getElementById('save-routine-btn').parentNode;
-  if (routineData.length > 0 && !document.getElementById('clear-routine-btn')) {
-    const clearBtn = document.createElement('button');
-    clearBtn.id = 'clear-routine-btn';
-    clearBtn.textContent = 'Limpiar Todas las Rutinas';
-    clearBtn.style.backgroundColor = '#aa0000';
-    clearBtn.style.color = 'white';
-    clearBtn.style.border = 'none';
-    clearBtn.style.padding = '10px';
-    clearBtn.style.borderRadius = '5px';
-    clearBtn.style.marginTop = '10px';
-    clearBtn.style.width = '100%';
-    clearBtn.addEventListener('click', clearAllRoutines);
-    
-    saveBtnContainer.insertBefore(clearBtn, document.getElementById('save-routine-btn').nextSibling);
-  }
-  
+
   if (document.getElementById('blocks-container').children.length === 0) {
     addBlock();
   }
@@ -99,15 +98,15 @@ function addBlock() {
       <button class="add-exercise" style="background:#005577;color:#fff;border:none;padding:8px;border-radius:5px;width:100%;cursor:pointer;">+ Ejercicio</button>
     </div>
   `;
-  
+
   var container = document.getElementById('blocks-container');
   container.insertAdjacentHTML('beforeend', blockHTML);
-  
+
   var newBlock = container.lastElementChild;
   newBlock.querySelector('.remove-block').addEventListener('click', function() {
     this.closest('.block').remove();
   });
-  
+
   newBlock.querySelector('.add-exercise').addEventListener('click', function() {
     this.previousElementSibling.insertAdjacentHTML('beforeend', generateExerciseInput());
   });
@@ -123,22 +122,22 @@ function generateExerciseInput() {
   `;
 }
 
-// Guardar rutina
+// Guardar rutina activa (en edición) y además preguntar nombre para guardarla en "rutinas guardadas"
 function saveRoutine() {
   var blocks = document.querySelectorAll('.block');
   routineData = [];
-  
+
   blocks.forEach(function(block, index) {
     var title = block.querySelector('.block-title').value || `Bloque ${index + 1}`;
     var exercises = [];
     var inputs = block.querySelectorAll('.exercises-list input');
-    
+
     inputs.forEach(function(input) {
       if (input.value.trim() !== '') {
         exercises.push(input.value.trim());
       }
     });
-    
+
     if (exercises.length > 0) {
       routineData.push({
         title: title,
@@ -146,18 +145,176 @@ function saveRoutine() {
       });
     }
   });
-  
+
+  if (routineData.length === 0) {
+    alert('La rutina no puede estar vacía.');
+    return;
+  }
+
+  // Preguntar nombre para guardar la rutina completa
+  var routineName = prompt('Ingrese un nombre para esta rutina:', 'Mi Rutina');
+
+  if (!routineName || routineName.trim() === '') {
+    alert('El nombre es obligatorio para guardar la rutina.');
+    return;
+  }
+
+  // Guardar rutina activa en localStorage
   try {
     localStorage.setItem('gymRoutine', JSON.stringify(routineData));
-    displayRoutine();
-    hideRoutineModal();
-  } catch(e) {
-    alert('No se pudo guardar la rutina');
-    console.error('Error al guardar:', e);
+  } catch (e) {
+    alert('No se pudo guardar la rutina activa.');
+    console.error('Error al guardar rutina activa:', e);
+  }
+
+  // Guardar rutina completa en lista de rutinas guardadas
+  saveRoutineToSavedList(routineName.trim(), routineData);
+
+  displayRoutine();
+  loadSavedRoutinesList();
+  hideRoutineModal();
+}
+
+// Mostrar rutinas guardadas en el select
+function loadSavedRoutinesList() {
+  var select = document.getElementById('saved-routines-select');
+  if (!select) return;
+
+  var saved = localStorage.getItem(savedRoutinesKey);
+  var savedRoutines = [];
+
+  try {
+    savedRoutines = saved ? JSON.parse(saved) : [];
+  } catch (e) {
+    console.error('Error al parsear rutinas guardadas:', e);
+    savedRoutines = [];
+  }
+
+  // Limpiar opciones
+  select.innerHTML = '';
+
+  if (savedRoutines.length === 0) {
+    var option = document.createElement('option');
+    option.text = 'No hay rutinas guardadas';
+    option.value = '';
+    select.add(option);
+    return;
+  }
+
+  savedRoutines.forEach(function(routine, i) {
+    var option = document.createElement('option');
+    option.text = routine.name;
+    option.value = i;
+    select.add(option);
+  });
+}
+
+// Guardar rutina en lista guardada
+function saveRoutineToSavedList(name, routine) {
+  var saved = localStorage.getItem(savedRoutinesKey);
+  var savedRoutines = [];
+
+  try {
+    savedRoutines = saved ? JSON.parse(saved) : [];
+  } catch (e) {
+    console.error('Error al parsear rutinas guardadas:', e);
+    savedRoutines = [];
+  }
+
+  // Revisar si nombre existe, actualizar si sí, agregar si no
+  var existingIndex = savedRoutines.findIndex(r => r.name === name);
+  if (existingIndex >= 0) {
+    savedRoutines[existingIndex].data = routine;
+  } else {
+    savedRoutines.push({ name: name, data: routine });
+  }
+
+  try {
+    localStorage.setItem(savedRoutinesKey, JSON.stringify(savedRoutines));
+  } catch (e) {
+    alert('No se pudo guardar la lista de rutinas guardadas.');
+    console.error('Error al guardar lista:', e);
   }
 }
 
-// Cargar rutina guardada
+// Cargar rutina guardada seleccionada en editor
+function loadSelectedSavedRoutine() {
+  var select = document.getElementById('saved-routines-select');
+  if (!select || !select.value) {
+    alert('Seleccione una rutina guardada para cargar.');
+    return;
+  }
+
+  var saved = localStorage.getItem(savedRoutinesKey);
+  var savedRoutines = [];
+
+  try {
+    savedRoutines = saved ? JSON.parse(saved) : [];
+  } catch (e) {
+    console.error('Error al parsear rutinas guardadas:', e);
+    savedRoutines = [];
+  }
+
+  var idx = parseInt(select.value);
+  if (isNaN(idx) || idx < 0 || idx >= savedRoutines.length) {
+    alert('Rutina inválida seleccionada.');
+    return;
+  }
+
+  routineData = savedRoutines[idx].data || [];
+
+  // Limpiar editor actual
+  var container = document.getElementById('blocks-container');
+  container.innerHTML = '';
+
+  // Renderizar bloques cargados
+  routineData.forEach(function(block) {
+    addBlockFromData(block);
+  });
+}
+
+// Eliminar rutina guardada seleccionada
+function deleteSelectedSavedRoutine() {
+  var select = document.getElementById('saved-routines-select');
+  if (!select || !select.value) {
+    alert('Seleccione una rutina guardada para eliminar.');
+    return;
+  }
+
+  if (!confirm('¿Seguro que desea eliminar esta rutina guardada?')) return;
+
+  var saved = localStorage.getItem(savedRoutinesKey);
+  var savedRoutines = [];
+
+  try {
+    savedRoutines = saved ? JSON.parse(saved) : [];
+  } catch (e) {
+    console.error('Error al parsear rutinas guardadas:', e);
+    savedRoutines = [];
+  }
+
+  var idx = parseInt(select.value);
+  if (isNaN(idx) || idx < 0 || idx >= savedRoutines.length) {
+    alert('Rutina inválida seleccionada.');
+    return;
+  }
+
+  savedRoutines.splice(idx, 1);
+
+  try {
+    localStorage.setItem(savedRoutinesKey, JSON.stringify(savedRoutines));
+  } catch (e) {
+    alert('No se pudo actualizar la lista de rutinas guardadas.');
+    console.error('Error al guardar lista:', e);
+  }
+
+  loadSavedRoutinesList();
+  // Limpiar editor al borrar para evitar confusión
+  document.getElementById('blocks-container').innerHTML = '';
+  addBlock();
+}
+
+// Cargar rutina guardada en editor al iniciar página (solo la última activa)
 function loadSavedRoutine() {
   try {
     var saved = localStorage.getItem('gymRoutine');
@@ -165,7 +322,7 @@ function loadSavedRoutine() {
       routineData = JSON.parse(saved);
       displayRoutine();
     }
-  } catch(e) {
+  } catch (e) {
     console.error('Error al cargar rutina:', e);
   }
 }
@@ -174,14 +331,14 @@ function loadSavedRoutine() {
 function displayRoutine() {
   var display = document.getElementById('routine-display');
   if (!display) return;
-  
+
   display.innerHTML = '';
-  
+
   if (!routineData || routineData.length === 0) {
     display.style.display = 'none';
     return;
   }
-  
+
   display.style.display = 'flex';
   display.style.flexWrap = 'wrap';
   display.style.justifyContent = 'center';
@@ -189,9 +346,9 @@ function displayRoutine() {
   display.style.padding = '20px';
   display.style.backgroundColor = 'rgba(0,0,0,0.7)';
   display.style.borderRadius = '10px';
-  
+
   var colors = ['#FF5733', '#33FF57', '#3357FF', '#F3FF33', '#FF33F3'];
-  
+
   routineData.forEach(function(block, index) {
     var blockHTML = `
       <div class="routine-block" style="flex:1;min-width:250px;max-width:300px;background:rgba(255,255,255,0.05);padding:15px;border-radius:8px;border-left:4px solid ${colors[index % colors.length]}">
@@ -206,64 +363,92 @@ function displayRoutine() {
     `;
     display.insertAdjacentHTML('beforeend', blockHTML);
   });
-  
-  // Agregar eventos a los botones de eliminar
+
+  // Eventos para eliminar bloques desde vista previa
   document.querySelectorAll('.delete-routine-btn').forEach(btn => {
     btn.addEventListener('click', function() {
-      deleteRoutine(parseInt(this.dataset.index));
+      if (confirm('¿Eliminar este bloque?')) {
+        routineData.splice(parseInt(this.dataset.index), 1);
+        try {
+          localStorage.setItem('gymRoutine', JSON.stringify(routineData));
+          displayRoutine();
+        } catch (e) {
+          alert('Error al eliminar bloque.');
+          console.error('Error:', e);
+        }
+      }
     });
   });
 }
 
-// Eliminar una rutina específica
-function deleteRoutine(index) {
-  if (confirm('¿Eliminar esta rutina?')) {
-    routineData.splice(index, 1);
-    try {
-      localStorage.setItem('gymRoutine', JSON.stringify(routineData));
-      displayRoutine();
-      
-      // Si no quedan rutinas, quitar el botón de limpiar
-      if (routineData.length === 0) {
-        const clearBtn = document.getElementById('clear-routine-btn');
-        if (clearBtn) clearBtn.remove();
-      }
-    } catch(e) {
-      alert('Error al eliminar la rutina');
-      console.error('Error:', e);
-    }
-  }
+// Crear bloque en editor a partir de datos (para cargar rutina guardada)
+function addBlockFromData(block) {
+  var blockHTML = `
+    <div class="block" style="background:#333;padding:15px;margin-bottom:15px;border-radius:8px;">
+      <div style="display:flex;margin-bottom:10px;align-items:center;">
+        <input type="text" class="block-title" placeholder="Nombre del bloque" style="flex-grow:1;padding:8px;border-radius:5px;border:1px solid #555;background:#222;color:#fff;" value="${escapeHTML(block.title)}">
+        <button class="remove-block" style="background:#ff0000;color:#fff;border:none;border-radius:50%;width:25px;height:25px;margin-left:10px;cursor:pointer;">×</button>
+      </div>
+      <div class="exercises-list" style="margin-bottom:10px;">
+        ${block.exercises.map(ex => `
+          <div style="display:flex;margin-bottom:8px;">
+            <input type="text" placeholder="Ejercicio" style="flex-grow:1;padding:6px;border-radius:4px;border:1px solid #555;background:#222;color:#fff;margin-right:8px;" value="${escapeHTML(ex)}">
+            <button class="remove-exercise" style="background:#555;color:#fff;border:none;border-radius:4px;padding:0 8px;cursor:pointer;">×</button>
+          </div>
+        `).join('')}
+      </div>
+      <button class="add-exercise" style="background:#005577;color:#fff;border:none;padding:8px;border-radius:5px;width:100%;cursor:pointer;">+ Ejercicio</button>
+    </div>
+  `;
+
+  var container = document.getElementById('blocks-container');
+  container.insertAdjacentHTML('beforeend', blockHTML);
+
+  var newBlock = container.lastElementChild;
+  newBlock.querySelector('.remove-block').addEventListener('click', function() {
+    this.closest('.block').remove();
+  });
+
+  newBlock.querySelector('.add-exercise').addEventListener('click', function() {
+    this.previousElementSibling.insertAdjacentHTML('beforeend', generateExerciseInput());
+  });
 }
 
-// Limpiar todas las rutinas
+// Función para escapar texto y evitar inyección HTML (por seguridad)
+function escapeHTML(text) {
+  var div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// Limpiar todas las rutinas activas y guardadas (opcional, si quieres puedes dejar la función vieja o eliminarla)
 function clearAllRoutines() {
   if (confirm('¿Estás seguro que deseas eliminar TODAS las rutinas?')) {
     routineData = [];
     try {
       localStorage.removeItem('gymRoutine');
+      localStorage.removeItem(savedRoutinesKey);
       document.getElementById('routine-display').innerHTML = '';
       document.getElementById('blocks-container').innerHTML = '';
-      
-      // Eliminar el botón de limpiar
-      const clearBtn = document.getElementById('clear-routine-btn');
-      if (clearBtn) clearBtn.remove();
-      
-      // Agregar un bloque vacío para que pueda comenzar a crear nuevas
+
+      // Actualizar select
+      loadSavedRoutinesList();
+
       addBlock();
-    } catch(e) {
+    } catch (e) {
       alert('Error al limpiar las rutinas');
       console.error('Error:', e);
     }
   }
 }
 
-// Función para mostrar/ocultar rutinas
+// Función para mostrar/ocultar rutinas (igual que antes)
 function toggleRoutineDisplay() {
   const routineDisplay = document.getElementById('routine-display');
   if (!routineDisplay) return;
-  
+
   const displayStyle = window.getComputedStyle(routineDisplay).display;
-  
+
   if (displayStyle === 'none' || routineDisplay.style.display === 'none') {
     routineDisplay.style.display = 'flex';
     document.getElementById('toggle-routine-btn').textContent = 'Ocultar Rutinas';
@@ -279,11 +464,11 @@ function toggleRoutineDisplay() {
 document.addEventListener('DOMContentLoaded', function() {
   // Inicializar sistema de rutinas
   initRoutineSystem();
-  
+
   // Asignar eventos a los botones
   document.getElementById('create-routine-btn').addEventListener('click', showRoutineModal);
   document.getElementById('toggle-routine-btn').addEventListener('click', toggleRoutineDisplay);
-  
+
   // Cargar y mostrar rutinas al inicio
   loadSavedRoutine();
 });

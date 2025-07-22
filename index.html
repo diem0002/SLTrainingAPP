@@ -13,17 +13,16 @@
     </header>
 
     <!-- Timer View (arriba) -->
-    <!-- Timer View (arriba) -->
-<section id="timer-view" aria-live="polite">
-  <div id="phase-display">Trabajo</div>
-  <div id="timer-display">00:00</div>
-  <div id="round-display">Ronda 1 / 5</div>
-  <div id="controls-container">
-    <button id="btn-pause">Pausar</button>
-    <button id="btn-reset">Reiniciar</button>
-    <button id="btn-stop">Terminar</button>
-  </div>
-</section>
+    <section id="timer-view" aria-live="polite">
+      <div id="phase-display">Trabajo</div>
+      <div id="timer-display">00:00</div>
+      <div id="round-display">Ronda 1 / 5</div>
+      <div id="controls-container">
+        <button id="btn-pause">Pausar</button>
+        <button id="btn-reset">Reiniciar</button>
+        <button id="btn-stop">Terminar</button>
+      </div>
+    </section>
 
     <!-- Configuración inicial -->
     <section id="preset-container">
@@ -37,7 +36,7 @@
               <option value="min">min</option>
             </select>
           </label>
-          
+
           <label class="input-group">
             <span>Descanso:</span>
             <input type="number" id="custom-rest" min="0" max="99" value="15" class="time-input" />
@@ -47,28 +46,27 @@
             </select>
           </label>
         </div>
-        
+
         <div class="input-row">
           <label class="input-group">
             <span>Rondas:</span>
             <input type="number" id="custom-rounds" min="1" max="99" value="5" class="rounds-input" />
           </label>
         </div>
-        
+
         <div class="button-group">
           <button id="start-btn">Iniciar Timer</button>
-          <button id="create-routine-btn" class="routine-btn">Editar Rutinas</button>
+          <button id="create-routine-btn" class="routine-btn">Crear / Editar Rutina</button>
           <button id="toggle-routine-btn" class="routine-btn">Mostrar Rutinas</button>
         </div>
       </div>
     </section>
 
     <!-- Contenedor de Rutinas (abajo) -->
-    <div id="routine-display" class="routine-display-hidden"></div>
+    <div id="routine-display" class="routine-display-hidden" style="min-height:50px;"></div>
   </div>
 
   <audio id="sound-start" src="sounds/start.mp3" preload="auto"></audio>
-  
   <audio id="sound-end" src="sounds/end.mp3" preload="auto"></audio>
   <audio id="sound-startRing" src="sounds/StartRing.mp3" preload="auto"></audio>
 
