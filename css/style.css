@@ -22,9 +22,10 @@ header {
 }
 
 .logo {
-  width: 300px;
+  width: 100px;
   height: auto;
   max-width: 100%;
+  
 }
 
 #preset-container {
@@ -124,12 +125,12 @@ header {
   background: rgba(255,255,255,0.1);
   border-radius: 10px;
   border-left: 5px solid;
-  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+  box-shadow: 0 0 10px rgb(0, 0, 0);
 }
 
 .routine-block h3 {
   margin: 0 0 15px 0;
-  font-size: 1.3rem;
+  font-size:1.5rem;
   border-bottom: 2px solid;
   padding-bottom: 5px;
 }
@@ -141,7 +142,7 @@ header {
 
 .routine-block li {
   margin-bottom: 8px;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
 }
 
 #timer-view {
@@ -150,46 +151,46 @@ header {
   align-items: center;
   width: 100%;
   max-width: 500px;
-  padding: 30px;
+  padding: 15px;
   background: rgba(0,0,0,0.7);
   border-radius: 10px;
   box-shadow: 0 0 20px rgba(0,0,0,0.5);
   margin-top: 20px;
-  margin: 20px auto 0 auto;
+  margin: 10px auto 0 auto;
 }
 
 #timer-display {
-  font-size: 5rem;
+  font-size: 3.5rem;
   font-weight: bold;
-  margin: 20px 0;
+  margin: 10px 0;
   text-shadow: 0 0 10px rgba(0,0,0,0.7);
 }
 
 #phase-display {
-  font-size: 2rem;
-  margin-bottom: 10px;
+  font-size: 1.5rem;
+  margin-bottom: 5px;
 }
 
 #round-display {
-  font-size: 1.5rem;
-  margin-bottom: 20px;
+  font-size: 1.2rem;
+  margin-bottom: 10px;
 }
 
 #controls-container {
   display: flex;
-  gap: 15px;
+  gap: 10px;
   width: 100%;
   justify-content: center;
 }
 
 #btn-pause, #btn-reset, #btn-stop {
-  padding: 12px 20px;
-  font-size: 1rem;
+  padding: 8px 12px; /* Ajustado */
+  font-size: 0.9rem; /* Reducido de 1rem */
   border: none;
   border-radius: 5px;
   color: white;
   cursor: pointer;
-  min-width: 100px;
+  min-width: 80px; /* Reducido de 100px */
 }
 
 #btn-pause {
@@ -223,8 +224,14 @@ header {
 
 /* Responsive */
 @media (max-width: 768px) {
-  .main-container {
-    padding: 15px;
+  #timer-display {
+    font-size: 3rem; /* Reducido de 4rem */
+  }
+}
+
+@media (max-width: 480px) {
+  #timer-display {
+    font-size: 2.5rem; /* Reducido de 3.5rem */
   }
   
   .timer-settings {
@@ -263,10 +270,11 @@ header {
   
   #controls-container {
     flex-direction: column;
-    gap: 10px;
+    gap: 8px; /* Reducido de 10px */
   }
   
   #btn-pause, #btn-reset, #btn-stop {
     width: 100%;
+    font-size: 0.8rem;
   }
 }
