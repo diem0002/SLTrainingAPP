@@ -184,13 +184,13 @@ header {
 }
 
 #btn-pause, #btn-reset, #btn-stop {
-  padding: 8px 12px; /* Ajustado */
-  font-size: 0.9rem; /* Reducido de 1rem */
+  padding: 8px 12px;
+  font-size: 0.9rem;
   border: none;
   border-radius: 5px;
   color: white;
   cursor: pointer;
-  min-width: 80px; /* Reducido de 100px */
+  min-width: 80px;
 }
 
 #btn-pause {
@@ -225,13 +225,13 @@ header {
 /* Responsive */
 @media (max-width: 768px) {
   #timer-display {
-    font-size: 3rem; /* Reducido de 4rem */
+    font-size: 3rem;
   }
 }
 
 @media (max-width: 480px) {
   #timer-display {
-    font-size: 2.5rem; /* Reducido de 3.5rem */
+    font-size: 2.5rem;
   }
   
   .timer-settings {
@@ -270,11 +270,111 @@ header {
   
   #controls-container {
     flex-direction: column;
-    gap: 8px; /* Reducido de 10px */
+    gap: 8px;
   }
   
   #btn-pause, #btn-reset, #btn-stop {
     width: 100%;
     font-size: 0.8rem;
+  }
+}
+#routine-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.8);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: #222222;
+  padding: 20px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow: auto;
+}
+
+.block {
+  background: #333;
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+}
+
+.block-header {
+  display: flex;
+  margin-bottom: 10px;
+  align-items: center;
+}
+
+.block-title {
+  flex-grow: 1;
+  padding: 8px;
+  border-radius: 5px;
+  border: 1px solid #555;
+  background: #222;
+  color: #fff;
+}
+
+.remove-block {
+  background: #ff0000;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  margin-left: 10px;
+  cursor: pointer;
+}
+
+.exercise {
+  display: flex;
+  margin-bottom: 8px;
+}
+
+.exercise input {
+  flex-grow: 1;
+  padding: 6px;
+  border-radius: 4px;
+  border: 1px solid #555;
+  background: #222;
+  color: #fff;
+  margin-right: 8px;
+}
+
+.remove-exercise {
+  background: #555;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0 8px;
+  cursor: pointer;
+}
+
+.add-exercise {
+  background: #005577;
+  color: #fff;
+  border: none;
+  padding: 8px;
+  border-radius: 5px;
+  width: 100%;
+  cursor: pointer;
+}
+
+@media (max-width: 480px) {
+  .modal-content {
+    width: 95%;
+    padding: 15px;
+  }
+  
+  .block-title {
+    font-size: 14px;
   }
 }

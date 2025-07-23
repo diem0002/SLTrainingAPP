@@ -212,8 +212,6 @@ stopBtn.onclick = function() {
   stopTimer();
 };
 
-
-
 // Cargar rutinas al iniciar
 window.addEventListener('DOMContentLoaded', function() {
   if (typeof loadSavedRoutine === 'function') {
