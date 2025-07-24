@@ -7,10 +7,12 @@ const pauseBtn = document.getElementById('btn-pause');
 const resetBtn = document.getElementById('btn-reset');
 const stopBtn = document.getElementById('btn-stop');
 const soundStartRing = document.getElementById('sound-startRing');
+const soundBeep = document.getElementById('sound-beep');
 const toggleRoutineBtn = document.getElementById('toggle-routine-btn');
 
 // Configuración
 soundStartRing.volume = 1.0;
+soundBeep.volume = 0.5;
 
 // Variables del temporizador
 let workDuration, restDuration, totalRounds;
@@ -20,9 +22,14 @@ let timeLeft = 0;
 let timer = null;
 let isPaused = false;
 let isStopped = false;
+let countdownTimer = null;
 
 // Iniciar temporizador
 startBtn.onclick = function() {
+  startWorkout();
+};
+
+function startWorkout() {
   isStopped = false;
   
   const work = parseInt(document.getElementById('custom-work').value);
@@ -44,29 +51,56 @@ startBtn.onclick = function() {
   isPaused = false;
   
   updateDisplay();
-  
-  playStartRing(() => {
-    if (!isStopped) {
-      timer = setInterval(tick, 1000);
-    }
-  });
-};
+  startCountdown();
+}
 
-function playStartRing(callback) {
-  if (!soundStartRing || isStopped) {
-    if (callback) callback();
-    return;
+function startCountdown() {
+  // Limpiar cualquier cuenta regresiva previa
+  clearInterval(countdownTimer);
+  
+  let count = 3;
+  phaseDisplay.textContent = 'Preparado';
+  
+  // Función para actualizar la cuenta regresiva
+  function updateCountdown() {
+    if (count > 0) {
+      timerDisplay.textContent = count.toString();
+      playBeep();
+      count--;
+    } else {
+      clearInterval(countdownTimer);
+      timerDisplay.textContent = formatTime(timeLeft);
+      phaseDisplay.textContent = isWorking ? 'Trabajo' : 'Descanso';
+      playStartRing();
+      startTimer();
+    }
   }
   
+  // Mostrar el primer número inmediatamente
+  updateCountdown();
+  
+  // Configurar el intervalo para la cuenta regresiva
+  countdownTimer = setInterval(updateCountdown, 1000);
+}
+
+function startTimer() {
+  if (!isStopped) {
+    timer = setInterval(tick, 1000);
+  }
+}
+
+function playBeep() {
+  if (!soundBeep || isStopped) return;
+  
+  soundBeep.currentTime = 0;
+  soundBeep.play().catch(e => console.error("Error al reproducir pitido:", e));
+}
+
+function playStartRing() {
+  if (!soundStartRing || isStopped) return;
+  
   soundStartRing.currentTime = 0;
-  soundStartRing.play()
-    .then(() => {
-      if (callback && !isStopped) setTimeout(callback, 2000);
-    })
-    .catch(e => {
-      console.error("Error al reproducir sonido:", e);
-      if (callback) callback();
-    });
+  soundStartRing.play().catch(e => console.error("Error al reproducir sonido:", e));
 }
 
 function tick() {
@@ -77,7 +111,8 @@ function tick() {
   
   if (timeLeft < 0) {
     if (isWorking) {
-      if (restDuration > 0) {
+      // Solo cambiar a descanso si no es la última ronda
+      if (currentRound < totalRounds && restDuration > 0) {
         switchToRest();
       } else {
         nextRoundOrFinish();
@@ -135,22 +170,21 @@ function resetTimer() {
   currentRound = 1;
   timeLeft = workDuration;
   isPaused = false;
-  updateDisplay();
   
   stopAllSounds();
   clearInterval(timer);
+  clearInterval(countdownTimer);
   
-  playStartRing(() => {
-    if (!isStopped) {
-      timer = setInterval(tick, 1000);
-    }
-  });
+  updateDisplay();
+  startCountdown();
 }
 
 function stopTimer() {
   isStopped = true;
   clearInterval(timer);
+  clearInterval(countdownTimer);
   timer = null;
+  countdownTimer = null;
   isPaused = false;
   
   document.getElementById('preset-container').style.display = 'flex';
@@ -179,14 +213,17 @@ function stopAllSounds() {
   });
 }
 
+function formatTime(seconds) {
+  const displayTime = Math.max(0, seconds);
+  const min = Math.floor(displayTime / 60).toString().padStart(2, '0');
+  const sec = (displayTime % 60).toString().padStart(2, '0');
+  return `${min}:${sec}`;
+}
+
 function updateDisplay() {
   if (isStopped) return;
   
-  const displayTime = Math.max(0, timeLeft);
-  const min = Math.floor(displayTime / 60).toString().padStart(2, '0');
-  const sec = (displayTime % 60).toString().padStart(2, '0');
-  timerDisplay.textContent = `${min}:${sec}`;
-  
+  timerDisplay.textContent = formatTime(timeLeft);
   phaseDisplay.textContent = isWorking ? 'Trabajo' : 'Descanso';
   roundDisplay.textContent = `Ronda ${currentRound} / ${totalRounds}`;
   
