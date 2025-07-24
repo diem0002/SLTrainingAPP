@@ -230,6 +230,11 @@ function updateDisplay() {
   const bgClass = isPaused ? 'paused' : (isWorking ? 'active-work' : 'active-rest');
   document.getElementById('timer-view').className = bgClass;
   document.body.className = bgClass;
+
+  const progress = document.getElementById('progress');
+  const percentage = (timeLeft / (isWorking ? workDuration : restDuration)) * 100;
+  progress.style.width = `${percentage}%`;
+  progress.style.background = isWorking ? '#4CAF50' : '#2196F3'; // Verde para trabajo, azul para descanso
 }
 
 // Controladores de eventos
