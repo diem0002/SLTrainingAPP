@@ -55,13 +55,11 @@ function startWorkout() {
 }
 
 function startCountdown() {
-  // Limpiar cualquier cuenta regresiva previa
   clearInterval(countdownTimer);
   
   let count = 3;
   phaseDisplay.textContent = 'Preparado';
   
-  // Función para actualizar la cuenta regresiva
   function updateCountdown() {
     if (count > 0) {
       timerDisplay.textContent = count.toString();
@@ -76,10 +74,7 @@ function startCountdown() {
     }
   }
   
-  // Mostrar el primer número inmediatamente
   updateCountdown();
-  
-  // Configurar el intervalo para la cuenta regresiva
   countdownTimer = setInterval(updateCountdown, 1000);
 }
 
@@ -99,6 +94,7 @@ function playBeep() {
 function playStartRing() {
   if (!soundStartRing || isStopped) return;
   
+  soundStartRing.pause();
   soundStartRing.currentTime = 0;
   soundStartRing.play().catch(e => console.error("Error al reproducir sonido:", e));
 }
@@ -111,7 +107,6 @@ function tick() {
   
   if (timeLeft < 0) {
     if (isWorking) {
-      // Solo cambiar a descanso si no es la última ronda
       if (currentRound < totalRounds && restDuration > 0) {
         switchToRest();
       } else {
@@ -152,7 +147,31 @@ function finishWorkout() {
   phaseDisplay.textContent = 'Terminado';
   timerDisplay.textContent = '00:00';
   roundDisplay.textContent = '';
+  
+  // Detener todos los sonidos primero
   stopAllSounds();
+  
+  // Reproducir sonido de finalización
+  playFinalSound();
+}
+
+function playFinalSound() {
+  if (!soundStartRing || isStopped) return;
+  
+  // Configurar el volumen (podría ser más alto para el final)
+  soundStartRing.volume = 1.0;
+  
+  // Asegurarse de que el audio esté en el inicio
+  soundStartRing.currentTime = 0;
+  
+  // Reproducir el sonido
+  soundStartRing.play().catch(e => {
+    console.error("Error al reproducir sonido final:", e);
+    // Intentar nuevamente si falla
+    setTimeout(() => {
+      soundStartRing.play().catch(e => console.error("Error en segundo intento:", e));
+    }, 100);
+  });
 }
 
 function startNewRound() {
@@ -234,7 +253,7 @@ function updateDisplay() {
   const progress = document.getElementById('progress');
   const percentage = (timeLeft / (isWorking ? workDuration : restDuration)) * 100;
   progress.style.width = `${percentage}%`;
-  progress.style.background = isWorking ? '#4CAF50' : '#2196F3'; // Verde para trabajo, azul para descanso
+  progress.style.background = isWorking ? '#4CAF50' : '#2196F3';
 }
 
 // Controladores de eventos
