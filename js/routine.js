@@ -457,14 +457,37 @@ function addBlockFromData(block) {
         <button class="remove-block" style="background:#ff0000;color:#fff;border:none;border-radius:50%;width:25px;height:25px;margin-left:10px;cursor:pointer;">×</button>
       </div>
       <div class="exercises-list" style="margin-bottom:10px;">
-        ${block.exercises.map(ex => `
-          <div style="display:flex;margin-bottom:8px;">
-            <input type="text" placeholder="Ejercicio" style="flex-grow:1;padding:6px;border-radius:4px;border:1px solid #555;background:#222;color:#fff;margin-right:8px;" value="${escapeHTML(ex)}">
-            <button class="remove-exercise" style="background:#555;color:#fff;border:none;border-radius:4px;padding:0 8px;cursor:pointer;">×</button>
-          </div>
-        `).join('')}
+  `;
+
+  // Generar contenido de ejercicios y separadores
+  block.exercises.forEach(ex => {
+    if (typeof ex === 'object' && ex.type === 'separator') {
+      blockHTML += `
+        <div class="exercise-separator" style="margin:15px 0;display:flex;align-items:center;">
+          <div style="flex-grow:1;height:2px;background:currentColor;"></div>
+          <input type="text" class="separator-title" placeholder="Título sección" style="margin:0 10px;padding:5px;background:#222;color:#fff;border:1px solid #555;border-radius:4px;text-align:center;" value="${escapeHTML(ex.title)}">
+          <div style="flex-grow:1;height:2px;background:currentColor;"></div>
+        </div>
+        ${generateExerciseInput()}
+      `;
+    } else {
+      // Manejar tanto objetos como strings simples
+      const exerciseName = typeof ex === 'object' ? ex.name : ex;
+      blockHTML += `
+        <div style="display:flex;margin-bottom:8px;">
+          <input type="text" placeholder="Ejercicio" style="flex-grow:1;padding:6px;border-radius:4px;border:1px solid #555;background:#222;color:#fff;margin-right:8px;" value="${escapeHTML(exerciseName)}">
+          <button class="remove-exercise" style="background:#555;color:#fff;border:none;border-radius:4px;padding:0 8px;cursor:pointer;">×</button>
+        </div>
+      `;
+    }
+  });
+
+  blockHTML += `
       </div>
-      <button class="add-exercise" style="background:#005577;color:#fff;border:none;padding:8px;border-radius:5px;width:100%;cursor:pointer;">+ Ejercicio</button>
+      <div class="button-row">
+        <button class="add-exercise" style="background:#005577;color:#fff;border:none;padding:8px;border-radius:5px;cursor:pointer;">+ Ejercicio</button>
+        <button class="add-separator" style="background:#555;color:#fff;border:none;padding:8px;border-radius:5px;cursor:pointer;">+ Separador</button>
+      </div>
     </div>
   `;
 
@@ -477,15 +500,23 @@ function addBlockFromData(block) {
   });
 
   newBlock.querySelector('.add-exercise').addEventListener('click', function() {
-    this.previousElementSibling.insertAdjacentHTML('beforeend', generateExerciseInput());
+    this.closest('.block').querySelector('.exercises-list').insertAdjacentHTML('beforeend', generateExerciseInput());
+  });
+
+  newBlock.querySelector('.add-separator').addEventListener('click', function() {
+    this.closest('.block').querySelector('.exercises-list').insertAdjacentHTML('beforeend', generateSeparator());
   });
 }
 
 // Función para escapar texto HTML
 function escapeHTML(text) {
-  var div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
+  if (!text) return '';
+  return text.toString()
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 // Limpiar todas las rutinas
