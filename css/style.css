@@ -378,3 +378,78 @@ header {
     font-size: 14px;
   }
 }
+
+
+/* ===== ESTILOS PARA SEPARADORES ===== */
+.exercise-separator {
+  margin: 15px 0;
+  display: flex;
+  align-items: center;
+  color: inherit;
+}
+
+.exercise-separator > div {
+  flex-grow: 1;
+  height: 2px;
+  background: currentColor;
+}
+
+.separator-title {
+  margin: 0 10px;
+  padding: 5px 8px;
+  background: #222;
+  color: #fff;
+  border: 1px solid #555;
+  border-radius: 4px;
+  text-align: center;
+  min-width: 120px;
+  font-size: 0.9em;
+}
+
+/* Estilos para los botones de acción */
+.button-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.button-row button {
+  flex: 1;
+}
+
+/* Estilos para separadores en vista previa */
+.routine-block .separator {
+  display: flex;
+  align-items: center;
+  margin: 15px 0;
+  color: inherit;
+}
+
+.routine-block .separator-line {
+  flex-grow: 1;
+  height: 2px;
+  background: currentColor;
+}
+
+.routine-block .separator-title {
+  margin: 0 10px;
+  font-weight: bold;
+  font-size: 0.9em;
+  color: inherit;
+}
+
+/* Responsive para móviles */
+@media (max-width: 480px) {
+  .exercise-separator {
+    flex-direction: column;
+  }
+  
+  .separator-title {
+    width: 100%;
+    margin: 5px 0;
+  }
+  
+  .button-row {
+    flex-direction: column;
+  }
+}

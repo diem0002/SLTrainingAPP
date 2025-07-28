@@ -128,10 +128,11 @@ function addBlock() {
       </div>
       <div class="exercises-list" style="margin-bottom:10px;">
         ${generateExerciseInput()}
-        ${generateExerciseInput()}
-        ${generateExerciseInput()}
       </div>
-      <button class="add-exercise" style="background:#005577;color:#fff;border:none;padding:8px;border-radius:5px;width:100%;cursor:pointer;">+ Ejercicio</button>
+      <div class="button-row">
+        <button class="add-exercise" style="background:#005577;color:#fff;border:none;padding:8px;border-radius:5px;cursor:pointer;">+ Ejercicio</button>
+        <button class="add-separator" style="background:#555;color:#fff;border:none;padding:8px;border-radius:5px;cursor:pointer;">+ Separador</button>
+      </div>
     </div>
   `;
 
@@ -144,10 +145,25 @@ function addBlock() {
   });
 
   newBlock.querySelector('.add-exercise').addEventListener('click', function() {
-    this.previousElementSibling.insertAdjacentHTML('beforeend', generateExerciseInput());
+    this.closest('.block').querySelector('.exercises-list').insertAdjacentHTML('beforeend', generateExerciseInput());
+  });
+
+  newBlock.querySelector('.add-separator').addEventListener('click', function() {
+    this.closest('.block').querySelector('.exercises-list').insertAdjacentHTML('beforeend', generateSeparator());
   });
 }
 
+// Generar separadores para un ejercicio
+function generateSeparator() {
+  return `
+    <div class="exercise-separator" style="margin:15px 0;display:flex;align-items:center;">
+      <div style="flex-grow:1;height:2px;background:currentColor;"></div>
+      <input type="text" class="separator-title" placeholder="Título sección" style="margin:0 10px;padding:5px;background:#222;color:#fff;border:1px solid #555;border-radius:4px;text-align:center;">
+      <div style="flex-grow:1;height:2px;background:currentColor;"></div>
+    </div>
+    ${generateExerciseInput()}
+  `;
+}
 // Generar HTML para un ejercicio
 function generateExerciseInput() {
   return `
@@ -166,11 +182,25 @@ function saveRoutine() {
   blocks.forEach(function(block, index) {
     var title = block.querySelector('.block-title').value || `Bloque ${index + 1}`;
     var exercises = [];
-    var inputs = block.querySelectorAll('.exercises-list input');
+    var items = block.querySelectorAll('.exercises-list > div');
 
-    inputs.forEach(function(input) {
-      if (input.value.trim() !== '') {
-        exercises.push(input.value.trim());
+    items.forEach(function(item) {
+      if (item.classList.contains('exercise-separator')) {
+        var separatorTitle = item.querySelector('.separator-title').value.trim();
+        if (separatorTitle) {
+          exercises.push({
+            type: 'separator',
+            title: separatorTitle
+          });
+        }
+      } else {
+        var exerciseInput = item.querySelector('input[type="text"]');
+        if (exerciseInput && exerciseInput.value.trim() !== '') {
+          exercises.push({
+            type: 'exercise',
+            name: exerciseInput.value.trim()
+          });
+        }
       }
     });
 
@@ -375,7 +405,7 @@ function displayRoutine() {
   display.style.backgroundColor = 'rgba(0,0,0,0.7)';
   display.style.borderRadius = '10px';
 
-  var colors = ['#FF5733', '#33FF57', '#3357FF', '#F3FF33', '#FF33F3'];
+   var colors = ['#FF5733', '#33FF57', '#3357FF', '#F3FF33', '#FF33F3'];
 
   routineData.forEach(function(block, index) {
     var blockHTML = `
@@ -384,8 +414,26 @@ function displayRoutine() {
           <h3 style="color:#fff;margin-top:0;border-bottom:1px solid ${colors[index % colors.length]};padding-bottom:5px;">${block.title}</h3>
           <button class="delete-routine-btn" data-index="${index}" style="background:#aa0000;color:#fff;border:none;border-radius:5px;padding:3px 8px;cursor:pointer;">×</button>
         </div>
-        <ul style="color:#fff;padding-left:20px;margin-top:8px;">
-          ${block.exercises.map(ex => `<li style="margin-bottom:6px;">${ex}</li>`).join('')}
+        <ul style="color:#fff;padding-left:20px;margin-top:8px;list-style:none;">
+    `;
+
+    block.exercises.forEach(function(ex) {
+      if (ex.type === 'separator') {
+        blockHTML += `
+          <li class="separator" style="color:${colors[index % colors.length]}">
+            <div class="separator-line"></div>
+            <span class="separator-title">${ex.title}</span>
+            <div class="separator-line"></div>
+          </li>
+        `;
+      } else {
+        blockHTML += `
+          <li style="margin-bottom:8px;">${ex.name}</li>
+        `;
+      }
+    });
+
+    blockHTML += `
         </ul>
       </div>
     `;
@@ -394,18 +442,10 @@ function displayRoutine() {
 
   document.querySelectorAll('.delete-routine-btn').forEach(btn => {
     btn.addEventListener('click', function() {
-      if (confirm('¿Eliminar este bloque?')) {
-        routineData.splice(parseInt(this.dataset.index), 1);
-        try {
-          localStorage.setItem('gymRoutine', JSON.stringify(routineData));
-          displayRoutine();
-        } catch (e) {
-          alert('Error al eliminar bloque.');
-          console.error('Error:', e);
-        }
-      }
+      deleteRoutineBlock(this.dataset.index);
     });
   });
+
 }
 
 // Crear bloque en editor a partir de datos
@@ -518,6 +558,28 @@ function useTemporaryRoutine() {
   alert("⚠️ Rutina temporal en uso - No se guardará automáticamente");
 }
 
+function deleteRoutineBlock(index) {
+  if (confirm('¿Estás seguro que deseas eliminar este bloque de la rutina?')) {
+    // Eliminar el bloque de los datos
+    routineData.splice(index, 1);
+    
+    // Guardar los cambios
+    try {
+      localStorage.setItem('gymRoutine', JSON.stringify(routineData));
+      
+      // Volver a mostrar la rutina actualizada
+      displayRoutine();
+      
+      // Si no quedan bloques, ocultar la sección
+      if (routineData.length === 0) {
+        document.getElementById('routine-display').style.display = 'none';
+      }
+    } catch (e) {
+      alert('Error al guardar los cambios');
+      console.error('Error:', e);
+    }
+  }
+}
 
 // Inicialización al cargar la página
 document.addEventListener('DOMContentLoaded', function() {
@@ -525,4 +587,17 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('create-routine-btn').addEventListener('click', showRoutineModal);
   document.getElementById('toggle-routine-btn').addEventListener('click', toggleRoutineDisplay);
   loadSavedRoutine();
+  document.addEventListener('DOMContentLoaded', function() {
+  initRoutineSystem();
+  document.getElementById('create-routine-btn').addEventListener('click', showRoutineModal);
+  document.getElementById('toggle-routine-btn').addEventListener('click', toggleRoutineDisplay);
+  loadSavedRoutine();
+  
+  // Delegación de eventos para los botones de eliminar
+  document.getElementById('routine-display').addEventListener('click', function(e) {
+    if (e.target.classList.contains('delete-routine-btn')) {
+      deleteRoutineBlock(e.target.dataset.index);
+    }
+  });
+});
 });
