@@ -6,45 +6,47 @@ const startBtn = document.getElementById('start-btn');
 const pauseBtn = document.getElementById('btn-pause');
 const resetBtn = document.getElementById('btn-reset');
 const stopBtn = document.getElementById('btn-stop');
+const soundStart = document.getElementById('sound-start');
+const soundEnd = document.getElementById('sound-end');
 const soundStartRing = document.getElementById('sound-startRing');
 const soundBeep = document.getElementById('sound-beep');
-const toggleRoutineBtn = document.getElementById('toggle-routine-btn');
-
-// Configuración
-soundStartRing.volume = 1.0;
-soundBeep.volume = 0.5;
+const progressBar = document.getElementById('progress');
 
 // Variables del temporizador
-let workDuration, restDuration, totalRounds;
+let workDuration = 0;
+let restDuration = 0;
+let totalRounds = 0;
 let currentRound = 1;
 let isWorking = true;
 let timeLeft = 0;
 let timer = null;
+let countdownTimer = null;
 let isPaused = false;
 let isStopped = false;
-let countdownTimer = null;
 
-// Iniciar temporizador
-startBtn.onclick = function() {
-  startWorkout();
-};
+// Iniciar entrenamiento
+startBtn.addEventListener('click', startWorkout);
 
 function startWorkout() {
   isStopped = false;
   
-  const work = parseInt(document.getElementById('custom-work').value);
-  const rest = parseInt(document.getElementById('custom-rest').value);
-  const rounds = parseInt(document.getElementById('custom-rounds').value);
+  // Obtener valores de configuración
+  const work = parseInt(document.getElementById('custom-work').value) || 30;
+  const rest = parseInt(document.getElementById('custom-rest').value) || 15;
+  const rounds = parseInt(document.getElementById('custom-rounds').value) || 5;
   const workUnit = document.getElementById('custom-work-unit').value;
   const restUnit = document.getElementById('custom-rest-unit').value;
 
+  // Convertir a segundos
   workDuration = workUnit === 'min' ? work * 60 : work;
   restDuration = restUnit === 'min' ? rest * 60 : rest;
   totalRounds = rounds;
 
+  // Mostrar vista del timer
   document.getElementById('preset-container').style.display = 'none';
   document.getElementById('timer-view').style.display = 'flex';
   
+  // Inicializar variables
   currentRound = 1;
   isWorking = true;
   timeLeft = workDuration;
@@ -54,13 +56,21 @@ function startWorkout() {
   startCountdown();
 }
 
+// Cuenta regresiva inicial (3, 2, 1)
 function startCountdown() {
   clearInterval(countdownTimer);
   
+  if (isPaused || isStopped) return;
+
   let count = 3;
   phaseDisplay.textContent = 'Preparado';
   
   function updateCountdown() {
+    if (isPaused || isStopped) {
+      clearInterval(countdownTimer);
+      return;
+    }
+
     if (count > 0) {
       timerDisplay.textContent = count.toString();
       playBeep();
@@ -78,111 +88,94 @@ function startCountdown() {
   countdownTimer = setInterval(updateCountdown, 1000);
 }
 
+// Temporizador principal
 function startTimer() {
-  if (!isStopped) {
-    timer = setInterval(tick, 1000);
-  }
-}
+  clearInterval(timer);
+  
+  if (isStopped) return;
 
-function playBeep() {
-  if (!soundBeep || isStopped) return;
-  
-  soundBeep.currentTime = 0;
-  soundBeep.play().catch(e => console.error("Error al reproducir pitido:", e));
-}
-
-function playStartRing() {
-  if (!soundStartRing || isStopped) return;
-  
-  soundStartRing.pause();
-  soundStartRing.currentTime = 0;
-  soundStartRing.play().catch(e => console.error("Error al reproducir sonido:", e));
-}
-
-function tick() {
-  if (isPaused || isStopped) return;
-  
-  timeLeft--;
-  updateDisplay();
-  
-  if (timeLeft < 0) {
-    if (isWorking) {
-      if (currentRound < totalRounds && restDuration > 0) {
-        switchToRest();
+  timer = setInterval(() => {
+    if (isPaused || isStopped) return;
+    
+    timeLeft--;
+    updateDisplay();
+    
+    if (timeLeft < 0) {
+      if (isWorking) {
+        if (currentRound < totalRounds && restDuration > 0) {
+          switchToRest();
+        } else {
+          nextRoundOrFinish();
+        }
       } else {
         nextRoundOrFinish();
       }
-    } else {
-      nextRoundOrFinish();
     }
-  }
+  }, 1000);
 }
 
+// Cambiar a fase de descanso
 function switchToRest() {
-  if (isStopped) return;
-  
   isWorking = false;
   timeLeft = restDuration;
   updateDisplay();
   playStartRing();
 }
 
+// Manejar fin de ronda o entrenamiento
 function nextRoundOrFinish() {
-  if (isStopped) return;
-  
   currentRound++;
   
   if (currentRound > totalRounds) {
     finishWorkout();
   } else {
-    startNewRound();
+    isWorking = true;
+    timeLeft = workDuration;
+    updateDisplay();
+    playStartRing();
   }
 }
 
+// Finalizar entrenamiento
 function finishWorkout() {
   clearInterval(timer);
   timer = null;
+  
   document.getElementById('timer-view').className = 'finished';
   document.body.className = 'finished';
   phaseDisplay.textContent = 'Terminado';
   timerDisplay.textContent = '00:00';
   roundDisplay.textContent = '';
   
-  // Detener todos los sonidos primero
   stopAllSounds();
-  
-  // Reproducir sonido de finalización
   playFinalSound();
 }
 
-function playFinalSound() {
-  if (!soundStartRing || isStopped) return;
-  
-  // Configurar el volumen (podría ser más alto para el final)
-  soundStartRing.volume = 1.0;
-  
-  // Asegurarse de que el audio esté en el inicio
-  soundStartRing.currentTime = 0;
-  
-  // Reproducir el sonido
-  soundStartRing.play().catch(e => {
-    console.error("Error al reproducir sonido final:", e);
-    // Intentar nuevamente si falla
-    setTimeout(() => {
-      soundStartRing.play().catch(e => console.error("Error en segundo intento:", e));
-    }, 100);
-  });
-}
-
-function startNewRound() {
+// Controladores de botones
+pauseBtn.addEventListener('click', () => {
   if (isStopped) return;
   
-  isWorking = true;
-  timeLeft = workDuration;
+  isPaused = !isPaused;
+  pauseBtn.textContent = isPaused ? 'Continuar' : 'Pausar';
+  
+  if (isPaused) {
+    clearInterval(timer);
+    clearInterval(countdownTimer);
+  } else {
+    if (timeLeft === workDuration || timeLeft === restDuration) {
+      startCountdown();
+    } else {
+      startTimer();
+    }
+  }
+  
   updateDisplay();
-  playStartRing();
-}
+});
 
+resetBtn.addEventListener('click', resetTimer);
+stopBtn.addEventListener('click', stopTimer);
+
+// Función para resetear
 function resetTimer() {
   isStopped = false;
   isWorking = true;
@@ -198,6 +191,7 @@ function resetTimer() {
   startCountdown();
 }
 
+// Función para detener
 function stopTimer() {
   isStopped = true;
   clearInterval(timer);
@@ -210,28 +204,12 @@ function stopTimer() {
   document.getElementById('timer-view').style.display = 'none';
   
   stopAllSounds();
-  
   document.body.className = '';
   document.getElementById('timer-view').className = '';
   pauseBtn.textContent = 'Pausar';
 }
 
-function stopAllSounds() {
-  var sounds = [
-    document.getElementById('sound-start'),
-    document.getElementById('sound-beep'),
-    document.getElementById('sound-end'),
-    document.getElementById('sound-startRing')
-  ];
-  
-  sounds.forEach(function(sound) {
-    if (sound) {
-      sound.pause();
-      sound.currentTime = 0;
-    }
-  });
-}
-
+// Helper: Formatear tiempo (MM:SS)
 function formatTime(seconds) {
   const displayTime = Math.max(0, seconds);
   const min = Math.floor(displayTime / 60).toString().padStart(2, '0');
@@ -239,6 +217,7 @@ function formatTime(seconds) {
   return `${min}:${sec}`;
 }
 
+// Helper: Actualizar pantalla
 function updateDisplay() {
   if (isStopped) return;
   
@@ -246,35 +225,48 @@ function updateDisplay() {
   phaseDisplay.textContent = isWorking ? 'Trabajo' : 'Descanso';
   roundDisplay.textContent = `Ronda ${currentRound} / ${totalRounds}`;
   
+  // Actualizar clases CSS
   const bgClass = isPaused ? 'paused' : (isWorking ? 'active-work' : 'active-rest');
   document.getElementById('timer-view').className = bgClass;
   document.body.className = bgClass;
 
-  const progress = document.getElementById('progress');
-  const percentage = (timeLeft / (isWorking ? workDuration : restDuration)) * 100;
-  progress.style.width = `${percentage}%`;
-  progress.style.background = isWorking ? '#4CAF50' : '#2196F3';
+  // Actualizar barra de progreso
+  const totalTime = isWorking ? workDuration : restDuration;
+  const percentage = (timeLeft / totalTime) * 100;
+  progressBar.style.width = `${percentage}%`;
+  progressBar.style.backgroundColor = isWorking ? '#4CAF50' : '#2196F3';
 }
 
-// Controladores de eventos
-pauseBtn.onclick = function() {
-  if (isStopped) return;
-  
-  isPaused = !isPaused;
-  pauseBtn.textContent = isPaused ? 'Continuar' : 'Pausar';
-  updateDisplay();
-};
+// Helpers: Sonidos
+function playBeep() {
+  if (!soundBeep || isStopped) return;
+  soundBeep.currentTime = 0;
+  soundBeep.play().catch(e => console.error("Error al reproducir pitido:", e));
+}
 
-resetBtn.onclick = function() {
-  resetTimer();
-};
+function playStartRing() {
+  if (!soundStartRing || isStopped) return;
+  soundStartRing.currentTime = 0;
+  soundStartRing.play().catch(e => console.error("Error al reproducir sonido:", e));
+}
 
-stopBtn.onclick = function() {
-  stopTimer();
-};
+function playFinalSound() {
+  if (!soundEnd || isStopped) return;
+  soundEnd.currentTime = 0;
+  soundEnd.play().catch(e => console.error("Error al reproducir sonido final:", e));
+}
 
-// Cargar rutinas al iniciar
-window.addEventListener('DOMContentLoaded', function() {
+function stopAllSounds() {
+  [soundStart, soundBeep, soundEnd, soundStartRing].forEach(sound => {
+    if (sound) {
+      sound.pause();
+      sound.currentTime = 0;
+    }
+  });
+}
+
+// Inicialización
+document.addEventListener('DOMContentLoaded', () => {
   if (typeof loadSavedRoutine === 'function') {
     loadSavedRoutine();
   }
