@@ -11,6 +11,9 @@ const soundEnd = document.getElementById('sound-end');
 const soundStartRing = document.getElementById('sound-startRing');
 const soundBeep = document.getElementById('sound-beep');
 const progressBar = document.getElementById('progress');
+const routineDisplay = document.getElementById('routine-display');
+const presetContainer = document.getElementById('preset-container');
+const timerView = document.getElementById('timer-view');
 
 // Variables del temporizador
 let workDuration = 0;
@@ -25,8 +28,6 @@ let isPaused = false;
 let isStopped = false;
 
 // Iniciar entrenamiento
-startBtn.addEventListener('click', startWorkout);
-
 function startWorkout() {
   isStopped = false;
   
@@ -42,10 +43,16 @@ function startWorkout() {
   restDuration = restUnit === 'min' ? rest * 60 : rest;
   totalRounds = rounds;
 
-  // Mostrar vista del timer
-  document.getElementById('preset-container').style.display = 'none';
-  document.getElementById('timer-view').style.display = 'flex';
+  // Configurar vista
+  presetContainer.style.display = 'none';
+  timerView.style.display = 'flex';
+  routineDisplay.style.display = 'flex';
   
+  // Activar modo fullscreen
+  document.body.classList.add('fullscreen-mode');
+  timerView.classList.add('timer-as-background');
+  routineDisplay.classList.add('fullscreen-routines');
+
   // Inicializar variables
   currentRound = 1;
   isWorking = true;
@@ -141,39 +148,40 @@ function finishWorkout() {
   clearInterval(timer);
   timer = null;
   
-  document.getElementById('timer-view').className = 'finished';
-  document.body.className = 'finished';
+  // Aplicar estado visual "finished"
+  document.body.className = 'finished fullscreen-mode';
+  timerView.className = 'timer-as-background finished';
+  
+  // Actualizar texto
   phaseDisplay.textContent = 'Terminado';
   timerDisplay.textContent = '00:00';
   roundDisplay.textContent = '';
   
+  // Detener todos los sonidos primero
   stopAllSounds();
-  playFinalSound();
-}
-
-// Controladores de botones
-pauseBtn.addEventListener('click', () => {
-  if (isStopped) return;
   
-  isPaused = !isPaused;
-  pauseBtn.textContent = isPaused ? 'Continuar' : 'Pausar';
-  
-  if (isPaused) {
-    clearInterval(timer);
-    clearInterval(countdownTimer);
-  } else {
-    if (timeLeft === workDuration || timeLeft === restDuration) {
-      startCountdown();
-    } else {
-      startTimer();
-    }
+  // Reproducir startRing.mp3 (como tú querías)
+  if (soundStartRing) {
+    soundStartRing.currentTime = 0; // Rebobinar
+    soundStartRing.volume = 1.0; // Volumen al máximo
+    soundStartRing.play().catch(e => {
+      console.error("Error al reproducir startRing:", e);
+      // Fallback opcional: si falla, reproducir end.mp3
+      if (soundEnd) {
+        soundEnd.currentTime = 0;
+        soundEnd.play();
+      }
+    });
   }
   
-  updateDisplay();
-});
-
-resetBtn.addEventListener('click', resetTimer);
-stopBtn.addEventListener('click', stopTimer);
+  // Opcional: si quieres un sonido más largo al final, puedes agregar:
+  setTimeout(() => {
+    if (soundStartRing && !isStopped) {
+      soundStartRing.currentTime = 0;
+      soundStartRing.play();
+    }
+  }, 1000);
+}
 
 // Función para resetear
 function resetTimer() {
@@ -200,13 +208,20 @@ function stopTimer() {
   countdownTimer = null;
   isPaused = false;
   
-  document.getElementById('preset-container').style.display = 'flex';
-  document.getElementById('timer-view').style.display = 'none';
+  // Restaurar vista normal
+  presetContainer.style.display = 'flex';
+  timerView.style.display = 'none';
+  routineDisplay.style.display = 'none';
+  
+  // Quitar clases de fullscreen
+  document.body.className = '';
+  timerView.className = '';
+  routineDisplay.className = '';
+  
+  // Restablecer texto del botón de pausa
+  pauseBtn.textContent = 'Pausar';
   
   stopAllSounds();
-  document.body.className = '';
-  document.getElementById('timer-view').className = '';
-  pauseBtn.textContent = 'Pausar';
 }
 
 // Helper: Formatear tiempo (MM:SS)
@@ -225,14 +240,23 @@ function updateDisplay() {
   phaseDisplay.textContent = isWorking ? 'Trabajo' : 'Descanso';
   roundDisplay.textContent = `Ronda ${currentRound} / ${totalRounds}`;
   
-  // Actualizar clases CSS
-  const bgClass = isPaused ? 'paused' : (isWorking ? 'active-work' : 'active-rest');
-  document.getElementById('timer-view').className = bgClass;
-  document.body.className = bgClass;
+  // Determinar el estado actual
+  let stateClass = '';
+  if (isPaused) {
+    stateClass = 'paused';
+  } else if (isWorking) {
+    stateClass = 'active-work';
+  } else {
+    stateClass = 'active-rest';
+  }
+
+  // Aplicar clases de estado
+  document.body.className = stateClass + ' fullscreen-mode';
+  timerView.className = 'timer-as-background ' + stateClass;
 
   // Actualizar barra de progreso
   const totalTime = isWorking ? workDuration : restDuration;
-  const percentage = (timeLeft / totalTime) * 100;
+  const percentage = Math.max(0, (timeLeft / totalTime) * 100);
   progressBar.style.width = `${percentage}%`;
   progressBar.style.backgroundColor = isWorking ? '#4CAF50' : '#2196F3';
 }
@@ -264,6 +288,32 @@ function stopAllSounds() {
     }
   });
 }
+
+// Controladores de eventos
+startBtn.addEventListener('click', startWorkout);
+
+pauseBtn.addEventListener('click', () => {
+  if (isStopped) return;
+  
+  isPaused = !isPaused;
+  pauseBtn.textContent = isPaused ? 'Continuar' : 'Pausar';
+  
+  if (isPaused) {
+    clearInterval(timer);
+    clearInterval(countdownTimer);
+  } else {
+    if (timeLeft === workDuration || timeLeft === restDuration) {
+      startCountdown();
+    } else {
+      startTimer();
+    }
+  }
+  
+  updateDisplay();
+});
+
+resetBtn.addEventListener('click', resetTimer);
+stopBtn.addEventListener('click', stopTimer);
 
 // Inicialización
 document.addEventListener('DOMContentLoaded', () => {

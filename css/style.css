@@ -7,6 +7,7 @@ body {
   display: flex;
   justify-content: center;
   min-height: 100vh;
+  transition: background-color 0.5s ease;
 }
 
 .main-container {
@@ -25,7 +26,6 @@ header {
   width: 100px;
   height: auto;
   max-width: 100%;
-  
 }
 
 #preset-container {
@@ -88,27 +88,28 @@ header {
   border-radius: 5px;
   color: white;
   cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 #start-btn {
   background: #007700;
 }
 
+#start-btn:hover {
+  background: #009900;
+}
+
 .routine-btn {
   background: #005577;
 }
 
-.display-container {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
+.routine-btn:hover {
+  background: #007799;
 }
 
 #routine-display {
   width: 100%;
-  display: flex;
+  display: none;
   flex-wrap: wrap;
   justify-content: center;
   gap: 20px;
@@ -126,6 +127,11 @@ header {
   border-radius: 10px;
   border-left: 5px solid;
   box-shadow: 0 0 10px rgb(0, 0, 0);
+  transition: transform 0.3s ease;
+}
+
+.routine-block:hover {
+  transform: scale(1.02);
 }
 
 .routine-block h3 {
@@ -155,8 +161,8 @@ header {
   background: rgba(0,0,0,0.7);
   border-radius: 10px;
   box-shadow: 0 0 20px rgba(0,0,0,0.5);
-  margin-top: 20px;
   margin: 10px auto 0 auto;
+  transition: all 0.5s ease;
 }
 
 #timer-display {
@@ -164,6 +170,7 @@ header {
   font-weight: bold;
   margin: 10px 0;
   text-shadow: 0 0 10px rgba(0,0,0,0.7);
+  transition: all 0.3s ease;
 }
 
 #phase-display {
@@ -191,35 +198,144 @@ header {
   color: white;
   cursor: pointer;
   min-width: 80px;
+  transition: all 0.3s ease;
 }
 
 #btn-pause {
   background: #555500;
 }
 
+#btn-pause:hover {
+  background: #777700;
+}
+
 #btn-reset {
   background: #333;
+}
+
+#btn-reset:hover {
+  background: #555;
 }
 
 #btn-stop {
   background: #770000;
 }
 
-/* Estados del timer */
-#timer-view.active-work, body.active-work {
-  background-color: rgba(10, 102, 10, 0.8);
+#btn-stop:hover {
+  background: #990000;
 }
 
-#timer-view.active-rest, body.active-rest {
-  background-color: rgba(10, 64, 102, 0.8);
+/* ===== ESTADOS DEL TIMER ===== */
+body.active-work {
+  background-color: rgba(10, 102, 10, 0.2);
 }
 
-#timer-view.paused, body.paused {
-  background-color: rgba(170, 136, 0, 0.8);
+body.active-work #timer-view.timer-as-background {
+  background-color: rgba(10, 102, 10, 0.85) !important;
 }
 
-#timer-view.finished, body.finished {
-  background-color: rgba(102, 0, 0, 0.8);
+body.active-rest {
+  background-color: rgba(10, 64, 102, 0.2);
+}
+
+body.active-rest #timer-view.timer-as-background {
+  background-color: rgba(10, 64, 102, 0.85) !important;
+}
+
+body.paused {
+  background-color: rgba(170, 136, 0, 0.2);
+}
+
+body.paused #timer-view.timer-as-background {
+  background-color: rgba(170, 136, 0, 0.85) !important;
+}
+
+body.finished {
+  background-color: rgba(102, 0, 0, 0.2);
+}
+
+body.finished #timer-view.timer-as-background {
+  background-color: rgba(102, 0, 0, 0.85) !important;
+}
+
+/* ===== MODO FULLSCREEN ===== */
+.fullscreen-mode {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow-y: auto;
+  z-index: 100;
+}
+
+.timer-as-background {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  display: flex !important;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 1;
+  background: rgba(0, 0, 0, 0.9) !important;
+}
+
+.timer-as-background #timer-display {
+  font-size: 25vw !important;
+  opacity: 0.9;
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+}
+
+.timer-as-background #phase-display,
+.timer-as-background #round-display {
+  font-size: 5vw !important;
+  opacity: 0.9;
+}
+
+.timer-as-background #controls-container {
+  position: fixed !important;
+  bottom: 30px !important;
+  left: 0 !important;
+  width: 100% !important;
+  justify-content: center !important;
+  z-index: 200 !important;
+  background: rgba(0, 0, 0, 0.8) !important;
+  padding: 15px 0 !important;
+}
+
+.fullscreen-routines {
+  position: relative;
+  z-index: 2;
+  width: 100% !important;
+  min-height: 100vh;
+  padding: 20px;
+  display: flex !important;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+  background: transparent !important;
+}
+
+/* Barra de progreso */
+#progress-bar {
+  width: 100%;
+  height: 10px;
+  background: #333;
+  margin-top: 10px;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+#progress {
+  height: 100%;
+  width: 100%;
+  transition: width 0.5s linear, background-color 0.3s ease;
 }
 
 /* Responsive */
@@ -243,31 +359,6 @@ header {
     max-width: 100%;
   }
   
-  #timer-display {
-    font-size: 4rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .input-group {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  
-  .input-group span {
-    width: 100%;
-    margin-bottom: 5px;
-  }
-  
-  .time-input, .rounds-input, .unit-select {
-    width: 100%;
-    margin: 5px 0;
-  }
-  
-  #timer-display {
-    font-size: 3.5rem;
-  }
-  
   #controls-container {
     flex-direction: column;
     gap: 8px;
@@ -277,179 +368,126 @@ header {
     width: 100%;
     font-size: 0.8rem;
   }
-}
-#routine-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.8);
-  z-index: 1000;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  
+  .timer-as-background #timer-display {
+    font-size: 20vw !important;
+  }
+  
+  .timer-as-background #phase-display,
+  .timer-as-background #round-display {
+    font-size: 4vw !important;
+  }
 }
 
-.modal-content {
-  background: #222222;
+/* Controles flotantes - Versión corregida */
+.timer-as-background #controls-container {
+  position: fixed !important;
+  bottom: 20px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: auto !important;
+  max-width: 90% !important;
+  background: rgba(0, 0, 0, 0.6) !important;
+  padding: 10px 20px !important;
+  border-radius: 50px !important;
+  z-index: 200 !important;
+  display: flex !important;
+  gap: 10px !important;
+  backdrop-filter: none !important;
+}
+
+/* Ajuste para el texto de rondas */
+.timer-as-background #round-display {
+  position: fixed !important;
+  bottom: 80px !important; /* Encima de los botones */
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  font-size: 1.5rem !important;
+  color: white !important;
+  text-shadow: 0 0 5px black !important;
+  z-index: 150 !important;
+  background: rgba(0, 0, 0, 0.4) !important;
+  padding: 5px 15px !important;
+  border-radius: 20px !important;
+  white-space: nowrap !important;
+}
+
+/* ===== BLOQUES DE RUTINAS ===== */
+.fullscreen-routines {
+  position: relative;
+  z-index: 2;
+  width: 100% !important;
+  min-height: 100vh;
   padding: 20px;
+  display: flex !important;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+  background: transparent !important;
+}
+
+.routine-block {
+  flex: 1 1 300px;
+  max-width: 350px;
+  padding: 20px;
+  background: rgba(30, 30, 30, 0.95) !important; /* Fondo sólido casi opaco */
   border-radius: 10px;
-  width: 90%;
-  max-width: 500px;
-  max-height: 90vh;
-  overflow: auto;
-}
-
-.block {
-  background: #333;
-  padding: 15px;
-  margin-bottom: 15px;
-  border-radius: 8px;
-}
-
-.block-header {
-  display: flex;
-  margin-bottom: 10px;
-  align-items: center;
-}
-
-.block-title {
-  flex-grow: 1;
-  padding: 8px;
-  border-radius: 5px;
-  border: 1px solid #555;
-  background: #222;
+  border-left: 5px solid;
+  box-shadow: 
+    0 4px 20px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
   color: #fff;
 }
 
-.remove-block {
-  background: #ff0000;
+.routine-block h3 {
   color: #fff;
-  border: none;
-  border-radius: 50%;
-  width: 25px;
-  height: 25px;
-  margin-left: 10px;
-  cursor: pointer;
+  margin: 0 0 15px 0;
+  font-size: 1.5rem;
+  border-bottom: 2px solid currentColor;
+  padding-bottom: 5px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-.exercise {
-  display: flex;
+.routine-block ul {
+  padding-left: 20px;
+  margin: 0;
+}
+
+.routine-block li {
   margin-bottom: 8px;
+  font-size: 1.2rem;
+  color: #eee;
 }
 
-.exercise input {
-  flex-grow: 1;
-  padding: 6px;
-  border-radius: 4px;
-  border: 1px solid #555;
-  background: #222;
-  color: #fff;
-  margin-right: 8px;
+/* ===== CONTROLES Y RONDAS VISIBLES ===== */
+.timer-as-background #controls-container {
+  position: fixed !important;
+  bottom: 20px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: auto !important;
+  max-width: 90% !important;
+  background: rgba(0, 0, 0, 0.7) !important;
+  padding: 12px 25px !important;
+  border-radius: 50px !important;
+  z-index: 200 !important;
+  display: flex !important;
+  gap: 12px !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
 }
 
-.remove-exercise {
-  background: #555;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  padding: 0 8px;
-  cursor: pointer;
-}
-
-.add-exercise {
-  background: #005577;
-  color: #fff;
-  border: none;
-  padding: 8px;
-  border-radius: 5px;
-  width: 100%;
-  cursor: pointer;
-}
-
-@media (max-width: 480px) {
-  .modal-content {
-    width: 95%;
-    padding: 15px;
-  }
-  
-  .block-title {
-    font-size: 14px;
-  }
-}
-
-
-/* ===== ESTILOS PARA SEPARADORES ===== */
-.exercise-separator {
-  margin: 15px 0;
-  display: flex;
-  align-items: center;
-  color: inherit;
-}
-
-.exercise-separator > div {
-  flex-grow: 1;
-  height: 2px;
-  background: currentColor;
-}
-
-.separator-title {
-  margin: 0 10px;
-  padding: 5px 8px;
-  background: #222;
-  color: #fff;
-  border: 1px solid #555;
-  border-radius: 4px;
-  text-align: center;
-  min-width: 120px;
-  font-size: 0.9em;
-}
-
-/* Estilos para los botones de acción */
-.button-row {
-  display: flex;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.button-row button {
-  flex: 1;
-}
-
-/* Estilos para separadores en vista previa */
-.routine-block .separator {
-  display: flex;
-  align-items: center;
-  margin: 15px 0;
-  color: inherit;
-}
-
-.routine-block .separator-line {
-  flex-grow: 1;
-  height: 2px;
-  background: currentColor;
-}
-
-.routine-block .separator-title {
-  margin: 0 10px;
-  font-weight: bold;
-  font-size: 0.9em;
-  color: inherit;
-}
-
-/* Responsive para móviles */
-@media (max-width: 480px) {
-  .exercise-separator {
-    flex-direction: column;
-  }
-  
-  .separator-title {
-    width: 100%;
-    margin: 5px 0;
-  }
-  
-  .button-row {
-    flex-direction: column;
-  }
+.timer-as-background #round-display {
+  position: fixed !important;
+  bottom: 75px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  font-size: 1.3rem !important;
+  color: white !important;
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.7);
+  z-index: 150 !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+  padding: 6px 18px !important;
+  border-radius: 20px !important;
+  white-space: nowrap !important;
+  backdrop-filter: blur(2px);
 }
